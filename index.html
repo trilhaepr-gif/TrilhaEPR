@@ -183,7 +183,22 @@
                         <div class="dash-secao-titulo">&#128200; Distribuição por Área</div>
                         <div class="dash-graficos-grid">
                             <div class="dash-grafico-card">
-                                <div class="dash-grafico-titulo"><span>&#128376;</span> Radar de Competências</div>
+                                <div class="dash-grafico-titulo">
+                                    <span>&#128376;</span> Radar de Competências
+                                    <div class="radar-help-wrapper" id="radar-help-wrapper">
+                                        <button class="radar-help-icon" id="btn-radar-help" aria-label="Ajuda sobre as Macro-Áreas">?</button>
+                                        <div class="radar-help-panel" id="radar-help-panel">
+                                            <div class="radar-help-titulo">Macro-Áreas de Competência</div>
+                                            <ul class="radar-help-lista">
+                                                <li><strong>Exatas & Tecnologia:</strong> Matemática, Estatística, Física, TI e Computação.</li>
+                                                <li><strong>Operações & Produção:</strong> Produção Básica, Logística, PCP, Qualidade e Ergonomia.</li>
+                                                <li><strong>Gestão & Economia:</strong> Gestão, Humanas, Economia, Contabilidade e Administração.</li>
+                                                <li><strong>Eng. Especializada:</strong> Engenharias (Química, Materiais, Mecânica, Específicas de Produção).</li>
+                                                <li><strong>Projetos & Integração:</strong> PSP, Estágio, TCC e Disciplinas Integrativas.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="dash-canvas-wrapper"><canvas id="dash-chart-radar"></canvas></div>
                             </div>
                             <div class="dash-grafico-card">
@@ -286,7 +301,7 @@
                 <div class="ia-acao-carga-wrapper">
                     <div class="ia-carga-container">
                         <label for="ia-carga" class="ia-carga-label">
-                            Carga IA: <b id="valor-carga" style="color: #fff;">240h</b>
+                            Carga Horária: <b id="valor-carga" style="color: #fff;">240h</b>
                         </label>
                         <input type="range" id="ia-carga" min="120" max="420" step="30" value="240"
                             class="ia-carga-range"
@@ -458,13 +473,13 @@
                             <div class="importar-passo-num">1</div>
                             <div class="importar-passo-texto">
                                 <strong>Abra o SIGAA</strong> e navegue até
-                                <em>Portal do Discente → Ensino → Consultar Histórico</em>.
+                                <em>Portal do Discente → Ensino → Emitir Histórico</em>.
                             </div>
                         </div>
                         <div class="importar-passo">
                             <div class="importar-passo-num">2</div>
                             <div class="importar-passo-texto">
-                                Pressione <kbd>Ctrl</kbd> + <kbd>A</kbd> para selecionar toda a página,
+                                Abra o arquivo baixado e pressione <kbd>Ctrl</kbd> + <kbd>A</kbd> para selecionar toda a página,
                                 depois <kbd>Ctrl</kbd> + <kbd>C</kbd> para copiar.
                             </div>
                         </div>
@@ -482,7 +497,7 @@
                 <div class="importar-lgpd">
                     <span class="importar-lgpd-icone">&#128274;</span>
                     <div id="importar-desc" class="importar-lgpd-texto">
-                        <strong>Privacidade Garantida (LGPD):</strong> O Trilha EPR processa os dados
+                        <strong>Privacidade Garantida:</strong> O Trilha EPR processa os dados
                         <em>localmente no seu navegador</em>. Nenhuma informação pessoal, nota ou
                         matrícula é enviada aos nossos servidores.
                     </div>
@@ -538,7 +553,7 @@ O sistema irá encontrar automaticamente todos os códigos de disciplinas que vo
                 <div class="pdf-header-esq">
                     <div class="pdf-icone-titulo">&#128196;</div>
                     <div>
-                        <h2 id="pdf-titulo" class="pdf-titulo">Importar Histórico Escolar</h2>
+                        <h2 id="pdf-titulo" class="pdf-titulo">Importar Histórico Acadêmico</h2>
                         <p class="pdf-subtitulo">Upload do PDF emitido pelo SIGAA · 100% local</p>
                     </div>
                 </div>
@@ -555,7 +570,7 @@ O sistema irá encontrar automaticamente todos os códigos de disciplinas que vo
                         <div class="pdf-passo">
                             <div class="pdf-passo-num">1</div>
                             <div class="pdf-passo-texto">
-                                No <strong>SIGAA</strong>, acesse <em>Ensino &rarr; Emitir Hist&oacute;rico</em> e clique em <strong>Emitir</strong>. Quando o PDF abrir no navegador, salve-o no seu computador (<kbd>Ctrl</kbd>+<kbd>S</kbd>).
+                                No <strong>SIGAA</strong>, acesse <em>Ensino &rarr; Emitir Hist&oacute;rico</em>. Quando baixar o arquivo, pode seguir com o passo 2.
                             </div>
                         </div>
                         <div class="pdf-passo">
@@ -571,7 +586,7 @@ O sistema irá encontrar automaticamente todos os códigos de disciplinas que vo
                 <div class="pdf-lgpd" id="pdf-desc">
                     <span class="pdf-lgpd-icone">&#128274;</span>
                     <div class="pdf-lgpd-texto">
-                        <strong>Privacidade Garantida (LGPD):</strong> O processamento deste arquivo é feito
+                        <strong>Privacidade Garantida:</strong> O processamento deste arquivo é feito
                         <em>localmente no seu navegador</em>. Seu histórico <strong>nunca sai do seu computador</strong>
                         e nenhum dado é enviado para os nossos servidores.
                     </div>

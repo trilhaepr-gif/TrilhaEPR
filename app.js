@@ -1831,27 +1831,48 @@ function atualizarDashboardOverlay() {
 
 /** Renderiza o gráfico Radar de competências */
 function _dashRenderizarRadar() {
-    const acumulador = new Map();
+
+    // ── DICIONÁRIO DE MAPEAMENTO: tag CSV → Pilar Semântico ──────────────
+    // Tags reais do CSV: exatas | humanas | prodbas | prodesp | projetos | seletiva-chave
+    // Módulo Livre é excluído intencionalmente — não define competência curricular.
+    const PILARES = [
+        'Exatas & Tecnologia',
+        'Operações & Produção',
+        'Gestão & Economia',
+        'Eng. Especializada',
+        'Projetos & Integração',
+    ];
+
+    const MAPA_AREA_PILAR = {
+        'exatas':         'Exatas & Tecnologia',    // Matemática, Física, Estatística, TI, Computação
+        'prodbas':        'Operações & Produção',   // Produção Básica, Logística, PCP, Qualidade, Ergonomia
+        'humanas':        'Gestão & Economia',      // Gestão & Humanas, Economia, Contabilidade, Admin.
+        'prodesp':        'Eng. Especializada',     // Engenharias específicas de EP — o core das optativas
+        'projetos':       'Projetos & Integração',  // Projetos, Estágio, TCC, PSP
+        'seletiva-chave': 'Projetos & Integração',  // Seletivas integrativas (TCC, etc.)
+    };
+
+    // ── ACUMULAÇÃO POR PILAR ─────────────────────────────────────────────
+    // Inicializa todos os pilares a zero para garantir que o pentágono
+    // sempre tenha 5 vértices, mesmo que algum não tenha horas ainda.
+    const acumulador = new Map(PILARES.map(p => [p, 0]));
 
     disciplinas.forEach(m => {
         if (!concluidas.has(m.id)) return;
 
-        const card = document.getElementById(m.id);
-        const rawLabel = card?.dataset?.trilha?.trim() || m.area?.trim() || 'Outros';
-        const label = DASH_NOMES_AREA[rawLabel] || rawLabel;
-        const horas = Number(m.horas) || 0;
+        const area = (m.area || '').trim().toLowerCase();
+        const pilar = MAPA_AREA_PILAR[area]; // undefined se não mapeada
 
-        acumulador.set(label, (acumulador.get(label) || 0) + horas);
+        if (!pilar) return; // descarta áreas desconhecidas e ML
+
+        const horas = Number(m.horas) || 0;
+        acumulador.set(pilar, acumulador.get(pilar) + horas);
     });
 
-    const horasML = calcularTotalML();
-    if (horasML > 0) {
-        acumulador.set('Módulo Livre', (acumulador.get('Módulo Livre') || 0) + horasML);
-    }
-
     const labels = [...acumulador.keys()];
-    const dados = labels.map(label => acumulador.get(label));
+    const dados  = labels.map(p => acumulador.get(p));
 
+    // ── RENDERIZAÇÃO ─────────────────────────────────────────────────────
     const ctx = document.getElementById('dash-chart-radar')?.getContext('2d');
     if (!ctx || !window.Chart) return;
 
@@ -1860,37 +1881,54 @@ function _dashRenderizarRadar() {
         data: {
             labels,
             datasets: [{
-                label: 'Horas por Árvore de Trilha',
+                label: 'Horas por Pilar de Competência',
                 data: dados,
-                backgroundColor: 'rgba(79,172,254,0.18)',
+                backgroundColor: 'rgba(79,172,254,0.15)',
                 borderColor: '#4facfe',
                 borderWidth: 2,
                 pointBackgroundColor: '#4facfe',
                 pointBorderColor: '#fff',
-                pointRadius: 4,
-                pointHoverRadius: 6
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: '#fff',
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.raw}h acumuladas`
+                    }
+                }
+            },
             scales: {
                 r: {
                     beginAtZero: true,
-                    suggestedMax: Math.max(...dados, 60),
-                    grid: { color: 'rgba(255,255,255,0.08)' },
-                    angleLines: { color: 'rgba(255,255,255,0.08)' },
-                    ticks: { color: '#94a3b8', font: { size: 10 }, backdropColor: 'transparent' },
-                    pointLabels: { color: '#cbd5e1', font: { size: 11 } }
+                    suggestedMax: Math.max(...dados, 120),
+                    grid:        { color: 'rgba(255,255,255,0.08)' },
+                    angleLines:  { color: 'rgba(255,255,255,0.08)' },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { size: 10 },
+                        backdropColor: 'transparent',
+                        stepSize: 120,
+                    },
+                    pointLabels: {
+                        color: '#cbd5e1',
+                        font: { size: 11, weight: '500' },
+                    }
                 }
             }
         }
     };
 
     if (_chartRadar) {
-        _chartRadar.data.labels = labels;
-        _chartRadar.data.datasets[0].data = dados;
+        _chartRadar.data.labels               = labels;
+        _chartRadar.data.datasets[0].data     = dados;
+        _chartRadar.options.scales.r.suggestedMax = Math.max(...dados, 120);
         _chartRadar.update();
     } else {
         _chartRadar = new Chart(ctx, cfg);
@@ -1902,12 +1940,20 @@ function _dashRenderizarDoughnut(horasOBG, horasOPT, horasML) {
     const ctx = document.getElementById('dash-chart-doughnut')?.getContext('2d');
     if (!ctx || !window.Chart) return;
 
+    // Cálculo das Porcentagens
+    const totalHoras = horasOBG + horasOPT + horasML;
+    const calcPerc = (horas) => totalHoras > 0 ? Number(((horas / totalHoras) * 100).toFixed(1)) : 0;
+    
+    const percOBG = calcPerc(horasOBG);
+    const percOPT = calcPerc(horasOPT);
+    const percML  = calcPerc(horasML);
+
     const cfg = {
         type: 'doughnut',
         data: {
             labels: ['Obrigatórias', 'Optativas', 'Módulo Livre'],
             datasets: [{
-                data: [horasOBG, horasOPT, horasML],
+                data: [percOBG, percOPT, percML],
                 backgroundColor: ['rgba(79,172,254,0.8)', 'rgba(67,233,123,0.8)', 'rgba(161,140,209,0.8)'],
                 borderColor: ['#4facfe', '#43e97b', '#a18cd1'],
                 borderWidth: 2,
@@ -1921,13 +1967,20 @@ function _dashRenderizarDoughnut(horasOBG, horasOPT, horasML) {
                 legend: {
                     position: 'bottom',
                     labels: { color: '#94a3b8', font: { size: 11 }, padding: 16, usePointStyle: true }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.label}: ${context.raw}%`;
+                        }
+                    }
                 }
             }
         }
     };
 
     if (_chartDoughnut) {
-        _chartDoughnut.data.datasets[0].data = [horasOBG, horasOPT, horasML];
+        _chartDoughnut.data.datasets[0].data = [percOBG, percOPT, percML];
         _chartDoughnut.update();
     } else {
         _chartDoughnut = new Chart(ctx, cfg);
@@ -2324,6 +2377,39 @@ function _pdfFecharSeClicarFora(e) {
         if (overlay) overlay.addEventListener('click', _pdfFecharSeClicarFora, { once: true });
     }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODAL DE AJUDA DO RADAR DE COMPETÊNCIAS (TOOLTIP)
+// ══════════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    const radarWrapper = document.getElementById('radar-help-wrapper');
+    const radarHelpBtn = document.getElementById('btn-radar-help');
+    const radarPanel   = document.getElementById('radar-help-panel');
+
+    if (radarWrapper && radarHelpBtn && radarPanel) {
+        // Eventos para Desktop (Hover)
+        radarWrapper.addEventListener('mouseenter', () => {
+            radarPanel.classList.add('visivel');
+        });
+        
+        radarWrapper.addEventListener('mouseleave', () => {
+            radarPanel.classList.remove('visivel');
+        });
+
+        // Eventos para Mobile/Touch (Click)
+        radarHelpBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evita fechamento imediato pelo document
+            radarPanel.classList.toggle('visivel');
+        });
+
+        // Fechar ao clicar fora no mobile
+        document.addEventListener('click', (e) => {
+            if (!radarWrapper.contains(e.target) && radarPanel.classList.contains('visivel')) {
+                radarPanel.classList.remove('visivel');
+            }
+        });
+    }
+});
 
 /**
  * Fecha o modal PDF.
