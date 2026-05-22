@@ -290,7 +290,7 @@ function construirInterface() {
             if (i === maxSemestre) {
                 const divisor = document.createElement('div');
                 divisor.style.marginTop = '25px'; divisor.style.paddingTop = '10px'; divisor.style.borderTop = '2px dashed var(--cor-borda-semestre)';
-                divisor.innerHTML = `<div style="font-weight: bold; font-size: 0.85rem; color: #5c88c2; text-align: center; margin-bottom: 10px; text-transform: uppercase;">Marcos Finais</div>`;
+                divisor.innerHTML = `<div style="font-weight: bold; font-size: 0.85rem; color: #5c88c2; text-align: center; margin-bottom: 10px; text-transform: uppercase;">MARCOS FINAIS <br> <span class='coluna-subtitulo'>(11º e 12º períodos)</span></div>`;
 
                 const gridMarcos = document.createElement('div');
                 gridMarcos.className = 'grid-cards';
