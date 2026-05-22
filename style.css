@@ -763,9 +763,27 @@
         }
 
         @media (max-width: 768px) {
+
+            /* ── CORRECÇÃO DO VÃO: garante que o main-container
+               não cria espaço extra além do que o JS já atribui a --header-h.
+               No mobile o header tem muito mais altura do que no desktop,
+               e a variável é actualizada pelo JS (ResizeObserver), por isso
+               usamos apenas padding-top aqui e zeramos margens extras. ── */
+            .main-container {
+                padding-top: var(--header-h);
+                padding-bottom: var(--barra-h);
+                padding-left: 10px;
+                padding-right: 10px;
+                gap: 12px;
+                /* Menos espaço entre seções no mobile */
+                margin: 0;
+            }
+
+            /* A caixa azul já fica imediatamente abaixo do header:
+               os 12px de gap do .main-container são suficientes. */
             .boas-vindas {
-                margin-top: 10px;
-                margin-bottom: 15px;
+                margin-top: 0;
+                margin-bottom: 0;
                 padding: 10px;
             }
 
@@ -1105,7 +1123,12 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: var(--header-h) 15px 30px;
+            /* Separado em propriedades individuais para que o @media mobile
+               possa sobrescrever padding-left/right sem apagar o padding-top dinâmico */
+            padding-top: var(--header-h);
+            padding-bottom: var(--barra-h);
+            padding-left: 15px;
+            padding-right: 15px;
         }
 
         .boas-vindas {
