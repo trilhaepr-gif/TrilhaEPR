@@ -1622,42 +1622,47 @@ function copiarListaGrade() {
         return;
     }
 
-    const { mapa } = calcularAlocacoes();
-
-    const DIAS = [
-        { num: '2', nome: 'Segunda' },
-        { num: '3', nome: 'Terça'   },
-        { num: '4', nome: 'Quarta'  },
-        { num: '5', nome: 'Quinta'  },
-        { num: '6', nome: 'Sexta'   }
-    ];
-    const TURNOS = [
-        { turno: 'M', slots: ['1','2','3','4','5'] },
-        { turno: 'T', slots: ['1','2','3','4','5','6'] },
-        { turno: 'N', slots: ['1','2','3','4'] }
-    ];
-
-    // Agrupa matérias únicas por dia (evita duplicar o mesmo código por múltiplos slots)
-    const linhas = [];
-    DIAS.forEach(({ num, nome }) => {
-        const codigosNoDia = new Set();
-        TURNOS.forEach(({ turno, slots }) => {
-            slots.forEach(slotNum => {
-                const arr = mapa[`${num}${turno}${slotNum}`];
-                if (arr) arr.forEach(p => codigosNoDia.add(p.codigo));
-            });
-        });
-        if (codigosNoDia.size > 0) {
-            linhas.push(`${nome}: ${[...codigosNoDia].join(', ')}`);
-        }
-    });
-
-    if (linhas.length === 0) {
-        alert('Nenhuma matéria alocada de segunda a sexta.');
+    // O botão Copiar Lista está visível apenas na visão Mobile, portanto usamos os elementos DOM da visão mobile
+    const diaCards = document.querySelectorAll('#modal-grade-body .dia-card');
+    
+    if (diaCards.length === 0) {
+        alert('A grade está vazia. Adicione matérias antes de copiar.');
         return;
     }
 
-    const texto = `📅 Minha Grade — Trilha EPR\n${linhas.join('\n')}`;
+    let linhasTexto = "Minha Grade Horária Simulada:\n\n";
+
+    diaCards.forEach(card => {
+        // Extrai o título do dia (removendo emoji e limpando espaços)
+        const diaTituloElement = card.querySelector('.dia-titulo');
+        const diaTitulo = diaTituloElement ? diaTituloElement.innerText.replace('📅', '').trim() : 'Dia';
+        
+        linhasTexto += `${diaTitulo}:\n`;
+
+        // Para não duplicar matérias que ocupam mais de um slot no mesmo dia
+        const materiasDoDia = new Set();
+
+        const pilulas = card.querySelectorAll('.pilula-materia');
+        pilulas.forEach(pilula => {
+            const elCod = pilula.querySelector('.txt-cod');
+            const elNome = pilula.querySelector('.pilula-nome-disc');
+            
+            if (elCod && elNome) {
+                const codigo = elCod.innerText.trim();
+                const nome = elNome.innerText.trim();
+                const entradaUnica = `- ${codigo}: ${nome}`;
+                
+                if (!materiasDoDia.has(entradaUnica)) {
+                    linhasTexto += `${entradaUnica}\n`;
+                    materiasDoDia.add(entradaUnica);
+                }
+            }
+        });
+        linhasTexto += '\n'; // Linha em branco entre os dias
+    });
+
+    // Remove espaços extras no final
+    const texto = linhasTexto.trim();
 
     const btn = document.getElementById('btn-copiar-lista');
     const textoOriginal = btn ? btn.innerText : '';
