@@ -338,15 +338,19 @@
         <div class="modal-ia">
             <div class="modal-header">
                 <h3 style="color:#4facfe; margin:0;">📅 Grade Horária Simulada</h3>
-                <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <button id="btn-baixar-grade" onclick="baixarGradePNG()"
                         style="background: transparent; color: #00e676; border: 1px solid #00e676; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: bold;">
                         📥 Salvar Imagem
                     </button>
+                    <button id="btn-copiar-lista" onclick="copiarListaGrade()"
+                        style="display: none; background: transparent; color: #4facfe; border: 1px solid #4facfe; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: bold;">
+                        📋 Copiar Lista
+                    </button>
                     <button class="btn-fechar-modal" onclick="fecharModalGrade()">&times;</button>
                 </div>
             </div>
-            <div class="modal-body" id="modal-grade-body" style="overflow-x: auto;"></div>
+            <div class="modal-body" id="modal-grade-body"></div>
         </div>
     </div>
 

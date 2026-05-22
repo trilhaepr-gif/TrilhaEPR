@@ -1011,48 +1011,91 @@
                 font-size: 0.8rem;
             }
 
+            /* ── GRADE: TROCA DE PARADIGMA DESKTOP→MOBILE ──────────────── */
+
+            /* Oculta completamente a tabela horizontal */
             .tabela-grade {
-                font-size: 0.6rem;
-            }
-
-            .tabela-grade th,
-            .tabela-grade td {
-                padding: 2px 1px;
-                min-width: 48px;
-            }
-
-            .col-turno-esconder {
                 display: none !important;
             }
 
-            .slot-hora-compacto {
-                padding: 2px !important;
-                font-size: 0.6rem;
-                min-width: 25px !important;
+            /* Activa o container de agenda vertical */
+            .grade-mobile-lista {
+                display: flex !important;
             }
 
-            .pilula-materia {
-                font-size: 0.5rem;
-                padding: 2px 1px;
-                white-space: normal;
-                line-height: 1.1;
-                max-width: 52px;
-                margin: 0 auto;
-            }
-
-            .pilula-materia span.txt-cod {
-                display: block;
-                font-size: 0.55rem;
-                word-break: break-all;
-            }
-
-            .td-grade-dia {
-                min-width: 50px;
-            }
-
+            /* Modal sem scroll horizontal */
             #modal-grade-body {
-                overflow-x: auto;
-                padding: 5px;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding: 10px 8px;
+            }
+
+            /* Pílula mobile: largura total, nome visível */
+            .pilula-materia {
+                font-size: 0.75rem;
+                padding: 8px 10px;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: unset;
+                text-align: left;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                width: 100%;
+                box-sizing: border-box;
+                max-width: none;
+            }
+
+            /* Nome da disciplina — visível apenas em mobile */
+            .pilula-nome-disc {
+                display: block;
+                font-size: 0.7rem;
+                font-weight: normal;
+                opacity: 0.85;
+                white-space: normal;
+                word-break: break-word;
+                margin-top: 2px;
+                line-height: 1.3;
+            }
+
+            /* Linha de código + setas (topo da pílula) */
+            .pilula-linha-cod {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            /* Setas com área de toque confortável em touch */
+            .pilula-materia .seta-dinamica {
+                min-width: 32px;
+                min-height: 32px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                padding: 0;
+            }
+
+            /* Dia-card: borda superior colorida por turno */
+            .dia-card[data-turno="M"] { border-top-color: #4facfe; }
+            .dia-card[data-turno="T"] { border-top-color: #f9a825; }
+            .dia-card[data-turno="N"] { border-top-color: #a18cd1; }
+
+            /* Slot-linha: alinhamento topo para pílulas multi-linha */
+            .slot-linha {
+                align-items: flex-start;
+            }
+
+            /* Botões do header do modal */
+            #btn-baixar-grade {
+                display: none !important;
+            }
+
+            #btn-copiar-lista {
+                display: inline-flex !important;
+                align-items: center;
+                gap: 5px;
             }
         }
 
@@ -1337,6 +1380,11 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* Nome da disciplina — oculto no desktop (tooltip nativo é suficiente) */
+        .pilula-nome-disc {
+            display: none;
         }
 
         .grade-mobile-lista {

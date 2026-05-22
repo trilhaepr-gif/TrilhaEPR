@@ -1378,25 +1378,69 @@ function calcularAlocacoes() {
 }
 
 
-function renderizarGradeVisual() {
-    const corpo = document.getElementById('modal-grade-body');
-    const DIAS = ['2', '3', '4', '5', '6', '7'];
-    const DIAS_NOME = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+// ─── Utilitário partilhado: constrói o HTML de uma pílula de matéria ─────────
+// isMobile controla: nome inline visível vs. apenas tooltip
+function _buildPilula(p, isMobile) {
+    const disc = disciplinas.find(d => d.codigo === p.codigo);
+    let iconeIA = '';
+    let infoAudit = '';
+    let setaEsqHTML = '';
+    let setaDirHTML = '';
+
+    if (disc) {
+        infoAudit = ` (${disc.horas}h)`;
+
+        if (sugeridasPelaIA.has(disc.id)) {
+            const val = sugeridasPelaIA.get(disc.id);
+            infoAudit += val > 0 ? ` — ${val}% afinidade` : ' — Sugestão IA';
+            iconeIA = ' ✨';
+        }
+
+        const turmas = separarTurmas(disc.horario);
+        if (turmas.length > 1) {
+            const idxAtual = (turmasSelecionadas.get(p.codigo) || 0);
+            infoAudit += ` · Turma ${idxAtual + 1}/${turmas.length}`;
+            setaEsqHTML = `<span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', -1)">❮</span>`;
+            setaDirHTML = `<span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', 1)">❯</span>`;
+        }
+    }
+
+    const cls    = p.choque ? 'pilula-choque' : 'pilula-ok';
+    const title  = isMobile ? '' : `title="${p.nome}${infoAudit}"`;
+    const nomeTxt = disc ? disc.nome : p.nome;
+
+    if (isMobile) {
+        // Mobile: estrutura de duas linhas (código + nome abaixo)
+        return `<div class="pilula-materia ${cls}">
+                    <div class="pilula-linha-cod">
+                        ${setaEsqHTML}
+                        <span class="txt-cod">${p.codigo}</span>${iconeIA}
+                        ${setaDirHTML}
+                    </div>
+                    <span class="pilula-nome-disc">${nomeTxt}</span>
+                </div>`;
+    } else {
+        // Desktop: pílula compacta com tooltip nativo
+        return `<div class="pilula-materia ${cls}" ${title}>${setaEsqHTML}<span class="txt-cod">${p.codigo}</span>${iconeIA}${setaDirHTML}</div>`;
+    }
+}
+
+// ─── Renderização DESKTOP (tabela horizontal) ─────────────────────────────────
+function _renderizarGradeDesktop(corpo, mapa, temChoqueGlobal) {
+    const DIAS      = ['2', '3', '4', '5', '6'];
+    const DIAS_NOME = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
     const LINHAS = [
         { turno: 'M', label: 'Manhã', slots: ['1', '2', '3', '4', '5'] },
         { turno: 'T', label: 'Tarde', slots: ['1', '2', '3', '4', '5', '6'] },
         { turno: 'N', label: 'Noite', slots: ['1', '2', '3', '4'] }
     ];
 
-    const { mapa, temChoqueGlobal } = calcularAlocacoes();
-
-    // Banner de alerta para choques resolúveis
     let html = '';
     if (temChoqueGlobal) {
         html += `<div class="alerta-header-modal" style="display:block;">
-                            ⚠️ <b>Conflito de Horário!</b><br>
-                            Use as setas interativas <span style="background:rgba(255,255,255,0.2); padding:0 3px; border-radius:3px;">❮ ❯</span> nas disciplinas em vermelho para testar outras turmas disponíveis.
-                         </div>`;
+                    ⚠️ <b>Conflito de Horário!</b><br>
+                    Use as setas interativas <span style="background:rgba(255,255,255,0.2); padding:0 3px; border-radius:3px;">❮ ❯</span> nas disciplinas em vermelho para testar outras turmas disponíveis.
+                 </div>`;
     }
 
     html += '<table class="tabela-grade"><thead><tr><th class="col-turno-esconder">Turno</th><th>Slot</th>';
@@ -1412,36 +1456,10 @@ function renderizarGradeVisual() {
             html += `<td class="slot-turno-label slot-hora-compacto">${linha.turno}${slotNum}</td>`;
             DIAS.forEach(dia => {
                 const chave = `${dia}${linha.turno}${slotNum}`;
-                const arr = mapa[chave];
+                const arr   = mapa[chave];
                 if (arr && arr.length > 0) {
                     html += '<td class="td-grade-dia"><div class="slot-celula">';
-                    arr.forEach(p => {
-                        const disc = disciplinas.find(d => d.codigo === p.codigo);
-                        let matchText = ''; let iconeIA = ''; let setas = '';
-
-                        if (disc) {
-                            // V22: Formatação Audital (Nome + CH + IA + Turma)
-                            let infoAudit = ` (${disc.horas}h)`;
-
-                            if (sugeridasPelaIA.has(disc.id)) {
-                                const val = sugeridasPelaIA.get(disc.id);
-                                infoAudit += val > 0 ? ` - (${val}% afinidade)` : ' - (Sugestão IA)';
-                                iconeIA = ' ✨';
-                            }
-
-                            const numTurmas = separarTurmas(disc.horario).length;
-                            if (numTurmas > 1) {
-                                const idxAtual = (turmasSelecionadas.get(p.codigo) || 0);
-                                infoAudit += ` Turma ${idxAtual + 1}/${numTurmas}`;
-                                setas = `<span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', -1)">❮</span><span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', 1)">❯</span>`;
-                            }
-                            matchText = infoAudit;
-                        }
-
-                        const cls = p.choque ? 'pilula-choque' : 'pilula-ok';
-                        const [setaEsq, setaDir] = setas ? setas.split('</span>').filter(s => s.trim()) : ['', ''];
-                        html += `<div class="pilula-materia ${cls}" title="${p.nome}${matchText}">${setaEsq ? setaEsq + '</span>' : ''}<span class="txt-cod">${p.codigo}</span>${iconeIA}${setaDir ? setaDir + '</span>' : ''}</div>`;
-                    });
+                    arr.forEach(p => { html += _buildPilula(p, false); });
                     html += '</div></td>';
                 } else {
                     html += '<td class="td-grade-dia"></td>';
@@ -1450,12 +1468,109 @@ function renderizarGradeVisual() {
             html += '</tr>';
         });
     });
-    html += '</tbody></table></div>';
-    if (planejadas.size === 0) {
-        html = '<div style="text-align:center; color:#777; padding:30px; font-style:italic;">Nenhuma matéria simulada. Clique nas matérias para planejar.</div>';
-    }
+
+    html += '</tbody></table>';
     corpo.innerHTML = html;
 }
+
+// ─── Renderização MOBILE (lista de agenda vertical) ───────────────────────────
+function _renderizarGradeMobile(corpo, mapa, temChoqueGlobal) {
+    // Dias Seg→Sex (segunda=2 … sexta=6); sábado omitido por ser muito raro
+    const DIAS = [
+        { num: '2', nome: 'Segunda-feira' },
+        { num: '3', nome: 'Terça-feira'   },
+        { num: '4', nome: 'Quarta-feira'  },
+        { num: '5', nome: 'Quinta-feira'  },
+        { num: '6', nome: 'Sexta-feira'   }
+    ];
+    const TURNOS = [
+        { turno: 'M', label: 'Manhã',  slots: ['1','2','3','4','5'] },
+        { turno: 'T', label: 'Tarde',  slots: ['1','2','3','4','5','6'] },
+        { turno: 'N', label: 'Noite',  slots: ['1','2','3','4'] }
+    ];
+
+    // Mapa legível slot → rótulo de horário aproximado (para exibição)
+    const HORA_LABEL = {
+        M1: '07:00', M2: '08:00', M3: '09:00', M4: '10:00', M5: '11:00',
+        T1: '13:00', T2: '14:00', T3: '15:00', T4: '16:00', T5: '17:00', T6: '18:00',
+        N1: '19:00', N2: '20:00', N3: '21:00', N4: '22:00'
+    };
+
+    let html = '';
+    if (temChoqueGlobal) {
+        html += `<div class="alerta-header-modal" style="display:block;">
+                    ⚠️ <b>Conflito de Horário!</b><br>
+                    Toque nas setas ❮ ❯ para tentar outras turmas.
+                 </div>`;
+    }
+
+    html += '<div class="grade-mobile-lista">';
+
+    let algumDia = false;
+
+    DIAS.forEach(({ num, nome }) => {
+        // Reúne todos os slots deste dia que têm matéria
+        const slotsComMateria = [];
+        TURNOS.forEach(({ turno, slots }) => {
+            slots.forEach(slotNum => {
+                const chave = `${num}${turno}${slotNum}`;
+                const arr   = mapa[chave];
+                if (arr && arr.length > 0) {
+                    slotsComMateria.push({ chave, turno, slotNum, arr });
+                }
+            });
+        });
+
+        if (slotsComMateria.length === 0) return; // dia sem aulas → omite
+        algumDia = true;
+
+        // Usa o primeiro turno do dia para a cor da borda
+        const turnoPrimario = slotsComMateria[0].turno;
+
+        html += `<div class="dia-card" data-turno="${turnoPrimario}">
+                    <div class="dia-titulo">📅 ${nome}</div>`;
+
+        slotsComMateria.forEach(({ chave, turno, slotNum, arr }) => {
+            const horaLabel = HORA_LABEL[`${turno}${slotNum}`] || `${turno}${slotNum}`;
+            html += `<div class="slot-linha">
+                        <span class="slot-horario">${horaLabel}</span>
+                        <div class="slot-materias">`;
+            arr.forEach(p => { html += _buildPilula(p, true); });
+            html += `       </div>
+                     </div>`;
+        });
+
+        html += '</div>'; // /dia-card
+    });
+
+    if (!algumDia) {
+        html += '<div style="text-align:center; color:#777; padding:30px; font-style:italic;">Nenhuma matéria simulada. Clique nas matérias para planejar.</div>';
+    }
+
+    html += '</div>'; // /grade-mobile-lista
+    corpo.innerHTML = html;
+}
+
+// ─── Ponto de entrada: detecta viewport e despacha ───────────────────────────
+function renderizarGradeVisual() {
+    const corpo = document.getElementById('modal-grade-body');
+    if (!corpo) return;
+
+    if (planejadas.size === 0) {
+        corpo.innerHTML = '<div style="text-align:center; color:#777; padding:30px; font-style:italic;">Nenhuma matéria simulada. Clique nas matérias para planejar.</div>';
+        return;
+    }
+
+    const { mapa, temChoqueGlobal } = calcularAlocacoes();
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        _renderizarGradeMobile(corpo, mapa, temChoqueGlobal);
+    } else {
+        _renderizarGradeDesktop(corpo, mapa, temChoqueGlobal);
+    }
+}
+
 
 // ==========================================
 // MOTOR DE TROCA DE TURMAS
@@ -1492,7 +1607,101 @@ function abrirModalGrade() {
 }
 function fecharModalGrade() { document.getElementById('modal-grade').style.display = 'none'; }
 
-// Inicialização Segura
+// Redesenha a grade ao girar o dispositivo (portrait ↔ landscape)
+window.addEventListener('resize', () => {
+    const modal = document.getElementById('modal-grade');
+    if (modal && modal.style.display === 'flex') {
+        renderizarGradeVisual();
+    }
+});
+
+// ─── COPIAR LISTA (UX Mobile) ─────────────────────────────────────────────────
+function copiarListaGrade() {
+    if (planejadas.size === 0) {
+        alert('A grade está vazia. Adicione matérias antes de copiar.');
+        return;
+    }
+
+    const { mapa } = calcularAlocacoes();
+
+    const DIAS = [
+        { num: '2', nome: 'Segunda' },
+        { num: '3', nome: 'Terça'   },
+        { num: '4', nome: 'Quarta'  },
+        { num: '5', nome: 'Quinta'  },
+        { num: '6', nome: 'Sexta'   }
+    ];
+    const TURNOS = [
+        { turno: 'M', slots: ['1','2','3','4','5'] },
+        { turno: 'T', slots: ['1','2','3','4','5','6'] },
+        { turno: 'N', slots: ['1','2','3','4'] }
+    ];
+
+    // Agrupa matérias únicas por dia (evita duplicar o mesmo código por múltiplos slots)
+    const linhas = [];
+    DIAS.forEach(({ num, nome }) => {
+        const codigosNoDia = new Set();
+        TURNOS.forEach(({ turno, slots }) => {
+            slots.forEach(slotNum => {
+                const arr = mapa[`${num}${turno}${slotNum}`];
+                if (arr) arr.forEach(p => codigosNoDia.add(p.codigo));
+            });
+        });
+        if (codigosNoDia.size > 0) {
+            linhas.push(`${nome}: ${[...codigosNoDia].join(', ')}`);
+        }
+    });
+
+    if (linhas.length === 0) {
+        alert('Nenhuma matéria alocada de segunda a sexta.');
+        return;
+    }
+
+    const texto = `📅 Minha Grade — Trilha EPR\n${linhas.join('\n')}`;
+
+    const btn = document.getElementById('btn-copiar-lista');
+    const textoOriginal = btn ? btn.innerText : '';
+
+    const aplicarFeedback = (sucesso) => {
+        if (!btn) return;
+        if (sucesso) {
+            btn.innerText = '✅ Copiado!';
+            btn.style.color = '#00e676';
+            btn.style.borderColor = '#00e676';
+        } else {
+            btn.innerText = '❌ Erro';
+        }
+        setTimeout(() => {
+            btn.innerText = textoOriginal;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto)
+            .then(() => aplicarFeedback(true))
+            .catch(() => aplicarFeedback(false));
+    } else {
+        // Fallback para navegadores antigos
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = texto;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            aplicarFeedback(true);
+        } catch {
+            aplicarFeedback(false);
+        }
+    }
+}
+
+
 // ==========================================
 // ==========================================
 // SELEÇÃO DE CARD DE TRILHA
