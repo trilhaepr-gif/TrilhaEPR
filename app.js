@@ -1786,26 +1786,35 @@ async function iniciarAplicacao() {
 }
 
 // ── AJUSTE DINÂMICO DE ESPAÇOS FIXOS (Header + Barra de Simulação) ──
-// Função unificada: mede as alturas reais e actualiza as variáveis CSS
+// Função unificada: mede as alturas reais e actualiza as variáveis CSS.
+// O respiro visual (+15px) é aplicado no CSS via calc(), não aqui,
+// para evitar dupla-contagem entre JS e CSS.
+let _ajustarTimer = null;
 function ajustarEspacosFixos() {
-    const header = document.querySelector('header');
-    const barra = document.getElementById('barra-simulacao');
-    const root = document.documentElement;
+    // ── TRAVA DE SEGURANÇA MOBILE ──
+    // No mobile o header é position:relative e flui normalmente no documento.
+    // Não há padding-top dinâmico no mobile — qualquer cálculo de --header-h
+    // seria um erro e causaria um vão fantasma. Bloqueio total abaixo de 768px.
+    if (window.innerWidth <= 768) return;
 
-    // Topo: altura real do header + 20px de respiro visual
-    if (header) {
-        root.style.setProperty('--header-h', (header.offsetHeight + 20) + 'px');
-    }
+    // Debounce de 120ms: aguarda o DOM estabilizar antes de medir.
+    clearTimeout(_ajustarTimer);
+    _ajustarTimer = setTimeout(() => {
+        const header = document.querySelector('header');
+        const barra = document.getElementById('barra-simulacao');
+        const root = document.documentElement;
 
-    // Rodapé: a barra sempre tem offsetHeight mensurável (transform não afecta o tamanho)
-    // Quando activa: altura real + 30px de folga
-    // Quando inactiva: 30px de respiro mínimo
-    if (barra) {
-        const alturaRodape = modoSimulacao && barra.offsetHeight > 0
-            ? barra.offsetHeight + 30
-            : 30;
-        root.style.setProperty('--barra-h', alturaRodape + 'px');
-    }
+        if (header) {
+            root.style.setProperty('--header-h', header.offsetHeight + 'px');
+        }
+
+        if (barra) {
+            const alturaRodape = modoSimulacao && barra.offsetHeight > 0
+                ? barra.offsetHeight + 30
+                : 30;
+            root.style.setProperty('--barra-h', alturaRodape + 'px');
+        }
+    }, 120);
 }
 
 // Observa qualquer mudança de tamanho no header (compacto ↔ expandido, resize)
