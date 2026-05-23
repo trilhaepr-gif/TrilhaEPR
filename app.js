@@ -1016,10 +1016,19 @@ function filtrarOptativas(area, ev) {
     ev.preventDefault();
     ev.stopPropagation();
     const botaoAtual = ev.currentTarget || ev.target;
+    
+    // Desativa todos os botões e ativa o clicado
     document.querySelectorAll('.pilula-filtro').forEach(b => b.classList.remove('ativa'));
     botaoAtual.classList.add('ativa');
+    
+    // Itera sobre todos os cartões de optativas
     document.querySelectorAll('.optativa-card').forEach(c => {
-        c.style.display = (area === 'todas' || c.getAttribute('data-area') === area) ? 'flex' : 'none';
+        const corresponde = (area === 'todas' || c.getAttribute('data-area') === area);
+        if (corresponde) {
+            c.classList.remove('escondido-por-filtro');
+        } else {
+            c.classList.add('escondido-por-filtro');
+        }
     });
 }
 
