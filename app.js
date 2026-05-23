@@ -336,36 +336,63 @@ function construirInterface() {
         });
     }
 
-    // 3. DESENHA AS OPTATIVAS NO CARROSSEL
+    // 3. DESENHA AS OPTATIVAS NO CARROSSEL (PADRÃO PRATELEIRAS)
     if (carrossel) {
-        disciplinas.filter(d => d.sem === 98).forEach(m => {
-            const card = document.createElement('div');
-            card.id = m.id;
-            card.className = `optativa-card card-vitrine ${m.area}`;
-            card.setAttribute('data-area', m.area);
-            card.setAttribute('data-trilha', m.area);
-            const bloqueado = !cumpreRequisitos(m);
-            if (bloqueado) {
-                card.classList.add('disciplina-bloqueada');
-                card.setAttribute('title', 'Pré-requisitos não cumpridos');
-                card.style.cursor = 'not-allowed';
-            }
-            card.innerHTML = `<div class="card-icone-watermark">${iconesAreas[m.area] || ''}</div><div style="display:flex; flex-direction:column;"><span class="card-codigo">${m.codigo}</span><span class="card-nome">${m.nome}</span></div><span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:4px; border-radius:4px; width:fit-content; margin-top:8px;">${m.horas}h</span>`;
-            card.onclick = () => { toggleCard(m.id); };
-            card.addEventListener('mouseenter', () => {
-                iluminarDominó(m.id);
-                clearTimeout(tooltipTimer);
-                tooltipTimer = setTimeout(() => {
-                    let msg = card.getAttribute('data-tooltip') || m.nome;
-                    mostrarTooltipHTML(`<div>${msg.replace(/\\n/g, '<br>')}</div>`);
-                }, 1100);
+        const optativas = disciplinas.filter(d => d.sem === 98);
+        const areas = [...new Set(optativas.map(d => d.area))];
+        
+        const nomesAreas = {
+            'prodesp': 'Engenharia Especializada',
+            'prodbas': 'Engenharia Básica',
+            'exatas': 'Ciências Exatas',
+            'humanas': 'Humanas e Gestão',
+            'projetos': 'Projetos',
+            'eletiva': 'Módulo Livre'
+        };
+
+        areas.forEach(area => {
+            const prateleira = document.createElement('section');
+            prateleira.className = 'prateleira-optativas';
+            
+            const titulo = document.createElement('h3');
+            titulo.className = 'titulo-prateleira';
+            titulo.textContent = nomesAreas[area] || area.toUpperCase();
+            prateleira.appendChild(titulo);
+            
+            const scrollPrateleira = document.createElement('div');
+            scrollPrateleira.className = 'scroll-prateleira';
+            
+            optativas.filter(m => m.area === area).forEach(m => {
+                const card = document.createElement('div');
+                card.id = m.id;
+                card.className = `optativa-card card-vitrine ${m.area}`;
+                card.setAttribute('data-area', m.area);
+                card.setAttribute('data-trilha', m.area);
+                const bloqueado = !cumpreRequisitos(m);
+                if (bloqueado) {
+                    card.classList.add('disciplina-bloqueada');
+                    card.setAttribute('title', 'Pré-requisitos não cumpridos');
+                    card.style.cursor = 'not-allowed';
+                }
+                card.innerHTML = `<div class="card-icone-watermark">${iconesAreas[m.area] || ''}</div><div style="display:flex; flex-direction:column;"><span class="card-codigo">${m.codigo}</span><span class="card-nome">${m.nome}</span></div><span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:4px; border-radius:4px; width:fit-content; margin-top:8px;">${m.horas}h</span>`;
+                card.onclick = () => { toggleCard(m.id); };
+                card.addEventListener('mouseenter', () => {
+                    iluminarDominó(m.id);
+                    clearTimeout(tooltipTimer);
+                    tooltipTimer = setTimeout(() => {
+                        let msg = card.getAttribute('data-tooltip') || m.nome;
+                        mostrarTooltipHTML(`<div>${msg.replace(/\\n/g, '<br>')}</div>`);
+                    }, 1100);
+                });
+                card.addEventListener('mouseleave', () => {
+                    clearTimeout(tooltipTimer);
+                    apagarDominó();
+                    esconderTooltipHTML();
+                });
+                scrollPrateleira.appendChild(card);
             });
-            card.addEventListener('mouseleave', () => {
-                clearTimeout(tooltipTimer);
-                apagarDominó();
-                esconderTooltipHTML();
-            });
-            carrossel.appendChild(card);
+            prateleira.appendChild(scrollPrateleira);
+            carrossel.appendChild(prateleira);
         });
     }
 }
@@ -1021,14 +1048,20 @@ function filtrarOptativas(area, ev) {
     document.querySelectorAll('.pilula-filtro').forEach(b => b.classList.remove('ativa'));
     botaoAtual.classList.add('ativa');
     
-    // Itera sobre todos os cartões de optativas
-    document.querySelectorAll('.optativa-card').forEach(c => {
-        const corresponde = (area === 'todas' || c.getAttribute('data-area') === area);
-        if (corresponde) {
-            c.classList.remove('escondido-por-filtro');
-        } else {
-            c.classList.add('escondido-por-filtro');
-        }
+    // Itera sobre as prateleiras e os cartões
+    document.querySelectorAll('.prateleira-optativas').forEach(prateleira => {
+        let temVisivel = false;
+        prateleira.querySelectorAll('.optativa-card').forEach(c => {
+            const corresponde = (area === 'todas' || c.getAttribute('data-area') === area);
+            if (corresponde) {
+                c.classList.remove('escondido-por-filtro');
+                temVisivel = true;
+            } else {
+                c.classList.add('escondido-por-filtro');
+            }
+        });
+        // Esconde a prateleira inteira (título incluso) se não tiver nenhum cartão visível
+        prateleira.style.display = temVisivel ? 'block' : 'none';
     });
 }
 

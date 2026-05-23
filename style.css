@@ -1770,21 +1770,80 @@
         }
 
         .carrossel-optativas {
+            /* Removido o flex e overflow, agora atua apenas como container vertical das secções */
+            display: block;
+        }
+
+        /* ── PADRÃO PRATELEIRAS (NETFLIX STYLE) ── */
+        .prateleira-optativas {
+            margin-bottom: 30px;
+        }
+        .titulo-prateleira {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--cor-texto);
+            font-weight: 600;
+        }
+        .scroll-prateleira {
             display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 15px;
-            scroll-behavior: smooth;
-            align-items: stretch;
+            gap: 15px;
         }
 
-        .carrossel-optativas::-webkit-scrollbar {
-            height: 8px;
+        /* --- Comportamento Desktop (Carrossel Horizontal Estilo Netflix) --- */
+        @media (min-width: 769px) {
+            .scroll-prateleira {
+                display: flex;
+                flex-wrap: nowrap !important; /* Força os cartões numa única linha */
+                overflow-x: auto; /* Ativa o scroll horizontal */
+                gap: 15px;
+                padding-bottom: 15px; /* Respiro para a barra de rolagem não esmagar os cartões */
+                scroll-behavior: smooth;
+            }
+
+            .optativa-card {
+                /* Ocupa cerca de 22% do espaço, mostrando ~4 cartões e o início do 5º (Efeito Peek) */
+                flex: 0 0 calc(22% - 15px) !important; 
+                min-width: 280px; /* Impede que o cartão fique esmagado em monitores menores */
+            }
+
+            /* --- Customização da Barra de Rolagem (Apenas para as prateleiras) --- */
+            .scroll-prateleira::-webkit-scrollbar {
+                height: 8px; /* Barra fina e elegante */
+            }
+            .scroll-prateleira::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.03); /* Fundo quase invisível */
+                border-radius: 10px;
+            }
+            .scroll-prateleira::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.15); /* Cor da barra em repouso */
+                border-radius: 10px;
+                transition: background 0.3s ease;
+            }
+            .scroll-prateleira::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.35); /* Brilha quando o rato passa por cima */
+            }
         }
 
-        .carrossel-optativas::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
+        /* --- Comportamento Mobile (Carrossel Horizontal com Efeito Peek) --- */
+        @media (max-width: 768px) {
+            .scroll-prateleira {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+                padding-bottom: 10px; /* Espaço para a scrollbar */
+                scroll-snap-type: x mandatory; /* Faz os cartões pararem alinhados */
+            }
+            
+            /* Ocultar barra de rolagem visualmente para ficar mais limpo */
+            .scroll-prateleira::-webkit-scrollbar {
+                display: none;
+            }
+
+            .scroll-prateleira .optativa-card {
+                /* O EFEITO PEEK: Ocupa 75% da tela, deixando 25% do próximo cartão visível */
+                flex: 0 0 75% !important; 
+                scroll-snap-align: start; /* Alinha o cartão ao fazer scroll */
+            }
         }
 
         .optativa-card {
