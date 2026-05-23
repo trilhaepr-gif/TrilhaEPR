@@ -567,6 +567,8 @@ function getDependentesFuturos(idBase) {
     const dependentes = new Set();
 
     function buscarFuturos(idAtual) {
+        const idLimpo = String(idAtual).trim().toUpperCase();
+
         disciplinas.forEach(d => {
             if (dependentes.has(d.id)) return;
 
@@ -575,9 +577,13 @@ function getDependentesFuturos(idBase) {
             if (d.req) {
                 d.req.forEach(r => {
                     if (Array.isArray(r)) {
-                        if (r.includes(idAtual)) isDependent = true;
+                        if (r.some(reqStr => String(reqStr).trim().toUpperCase() === idLimpo)) {
+                            isDependent = true;
+                        }
                     } else {
-                        if (r === idAtual) isDependent = true;
+                        if (String(r).trim().toUpperCase() === idLimpo) {
+                            isDependent = true;
+                        }
                     }
                 });
             }
@@ -585,16 +591,20 @@ function getDependentesFuturos(idBase) {
             if (!isDependent && d.coreq) {
                 d.coreq.forEach(c => {
                     if (Array.isArray(c)) {
-                        if (c.includes(idAtual)) isDependent = true;
+                        if (c.some(reqStr => String(reqStr).trim().toUpperCase() === idLimpo)) {
+                            isDependent = true;
+                        }
                     } else {
-                        if (c === idAtual) isDependent = true;
+                        if (String(c).trim().toUpperCase() === idLimpo) {
+                            isDependent = true;
+                        }
                     }
                 });
             }
 
             if (isDependent) {
                 dependentes.add(d.id);
-                buscarFuturos(d.id);
+                buscarFuturos(d.id); // Busca em profundidade os próximos dependentes
             }
         });
     }
@@ -647,8 +657,10 @@ function iluminarDominó(idBase) {
 
     if (dependentes && dependentes.size > 0) {
         dependentes.forEach(depId => {
-            const el = document.getElementById(depId);
-            if (el) el.classList.add('efeito-domino');
+            // Usa querySelectorAll para garantir que ilumina todos os cards renderizados no DOM com esse ID
+            document.querySelectorAll(`[id="${depId}"]`).forEach(el => {
+                el.classList.add('efeito-domino');
+            });
         });
     }
 }
@@ -839,8 +851,10 @@ function atualizarInterface() {
         const reqOkReal = cumpreRequisitosConcluidas(m);
 
         elementos.forEach(el => {
-            el.classList.remove('concluido', 'planejado', 'bloqueado', 'alerta-coreq', 'destrancado-simulacao', 'coreq-glow', 'falta-corequisito');
+            // Remove classes antigas e estado visual
+            el.classList.remove('concluido', 'planejado', 'bloqueado', 'disciplina-bloqueada', 'alerta-coreq', 'destrancado-simulacao', 'coreq-glow', 'falta-corequisito');
             el.removeAttribute('data-tooltip');
+            el.removeAttribute('title'); // Optativas usavam 'title' ao inicializar
             el.style.cursor = '';
             el.onclick = () => toggleCard(m.id);
 

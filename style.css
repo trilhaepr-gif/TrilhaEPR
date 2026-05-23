@@ -764,37 +764,25 @@
 
         @media (max-width: 768px) {
 
-            /* ── CORRECÇÃO DO VÃO: garante que o main-container
-               não cria espaço extra além do que o JS já atribui a --header-h.
-               No mobile o header tem muito mais altura do que no desktop,
-               e a variável é actualizada pelo JS (ResizeObserver), por isso
-               usamos apenas padding-top aqui e zeramos margens extras. ── */
+            /* ── SOLUÇÃO CIRÚRGICA DO VÃO ──
+               O header fixo não empurra o conteúdo — o body já flui por baixo dele.
+               O padding-top dinâmico (--header-h) era o culpado: no mobile o header
+               tem muito mais altura e criava um espaço gigante antes da caixa azul.
+               Anulamos com 20px fixos: espaço mínimo de respiro acima do primeiro elemento. */
             .main-container {
-                padding-top: var(--header-h);
-                padding-bottom: var(--barra-h);
+                /* Escudo exato: altura real do header flutuante + 15px de respiro */
+                padding-top: calc(var(--header-h) + 15px) !important;
+                /* Mantém a cura contra o vão gigante */
+                min-height: auto !important;
+                justify-content: flex-start !important;
+                gap: 12px;
                 padding-left: 10px;
                 padding-right: 10px;
-                gap: 12px;
-                /* Menos espaço entre seções no mobile */
-                margin: 0;
             }
 
-            /* A caixa azul já fica imediatamente abaixo do header:
-               os 12px de gap do .main-container são suficientes. */
+            /* ── Oculta completamente a caixa de boas-vindas no mobile ── */
             .boas-vindas {
-                margin-top: 0;
-                margin-bottom: 0;
-                padding: 10px;
-            }
-
-            .boas-vindas h2 {
-                font-size: 1.1rem;
-            }
-
-            .boas-vindas p {
-                font-size: 0.8rem !important;
-                display: block;
-                /* Mantém o texto visível e conciso no mobile */
+                display: none !important;
             }
 
             header {
