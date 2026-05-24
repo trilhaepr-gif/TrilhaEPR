@@ -763,21 +763,42 @@
         }
 
         @media (max-width: 768px) {
+            /* ── RESET ESTRUTURAL MOBILE ──
+               Libertação total do scroll nativo — elimina ghosting e tearing */
+            html, body {
+                height: auto !important;
+                max-height: none !important;
+                overflow-y: visible !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch; /* Suavidade nativa no iOS/Android */
+            }
 
-            /* ── SOLUÇÃO CIRÚRGICA DO VÃO ──
-               O header fixo não empurra o conteúdo — o body já flui por baixo dele.
-               O padding-top dinâmico (--header-h) era o culpado: no mobile o header
-               tem muito mais altura e criava um espaço gigante antes da caixa azul.
-               Anulamos com 20px fixos: espaço mínimo de respiro acima do primeiro elemento. */
+            /* Remove qualquer vestígio do CSS Grid anterior */
+            body {
+                display: block !important;
+            }
+
+            /* Header volta ao fluxo normal: não flutua, não sobrepõe, não precisa de compensação */
+            header {
+                position: relative !important;
+                height: auto !important;
+                top: auto !important;
+                width: 100%;
+                z-index: 1000;
+            }
+
+            /* Respiro padrão simples — sem calc(), sem variáveis, sem matemática */
             .main-container {
-                /* Escudo exato: altura real do header flutuante + 15px de respiro */
-                padding-top: calc(var(--header-h) + 15px) !important;
-                /* Mantém a cura contra o vão gigante */
-                min-height: auto !important;
-                justify-content: flex-start !important;
-                gap: 12px;
+                padding-top: 20px !important;
+                margin-top: 0 !important;
                 padding-left: 10px;
                 padding-right: 10px;
+                gap: 12px;
+                min-height: auto !important;
+                justify-content: flex-start !important;
+                /* Força aceleração por GPU: para o ghosting e duplicação de cards ao scroll */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
             }
 
             /* ── Oculta completamente a caixa de boas-vindas no mobile ── */
@@ -810,6 +831,14 @@
                 font-size: 1.1rem;
                 line-height: 1.2;
                 margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Esconde o " | Simulador de Fluxo" para dar espaço ao ? e à percentagem */
+            .header-esq h1 span {
+                display: none !important;
             }
 
             .termometro-wrapper {
@@ -858,14 +887,17 @@
             }
 
             .botoes-acao {
-                justify-content: space-between;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important; /* Exatamente 2 colunas de tamanhos iguais */
+                gap: 8px !important;
                 width: 100%;
-                gap: 10px;
-                display: flex;
             }
 
-            .botoes-acao button {
-                flex: 1;
+            .botoes-acao > button,
+            .botoes-acao > div {
+                width: 100% !important;
+                margin: 0 !important;
+                min-width: unset !important; /* Removemos min-widths que possam causar conflito */
                 text-align: center;
                 justify-content: center;
             }
@@ -2189,8 +2221,8 @@
         /* V8 L, V9, V10 Mobile: Ajuste seguro apenas mobile */
         @media (max-width: 768px) {
             body {
-                padding-top: 160px !important;
-                padding-bottom: 250px !important;
+                /* padding-top removido: causava phantom gap e sobreposição. Tratado pelo Reset Estrutural */
+                padding-bottom: 250px !important; /* Espaço para a barra de simulação fixa */
             }
 
             .grid-cards {
@@ -3914,6 +3946,37 @@
         }
         .pdf-btn-concluir:active {
             transform: translateY(0);
+        }
+        
+        /* --- BOTÃO VOLTAR AO TOPO (SCROLL UP) --- */
+        #btn-voltar-topo {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--cor-borda, #007bff); /* Usando a cor de destaque do tema se disponível */
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Escondido por padrão, fora da tela para baixo (GPU accelerated) */
+            transform: translateY(150px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #btn-voltar-topo.visivel {
+            transform: translateY(0);
+            opacity: 1;
         }
         
         /* ── MARRETA DO FILTRO (Prioridade Máxima de Ocultação) ── */

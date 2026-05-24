@@ -353,6 +353,7 @@ function construirInterface() {
         areas.forEach(area => {
             const prateleira = document.createElement('section');
             prateleira.className = 'prateleira-optativas';
+            prateleira.setAttribute('data-area', area); // Necessário para o filtro encontrar
             
             const titulo = document.createElement('h3');
             titulo.className = 'titulo-prateleira';
@@ -1048,20 +1049,24 @@ function filtrarOptativas(area, ev) {
     document.querySelectorAll('.pilula-filtro').forEach(b => b.classList.remove('ativa'));
     botaoAtual.classList.add('ativa');
     
-    // Itera sobre as prateleiras e os cartões
+    // Itera diretamente sobre as prateleiras inteiras
     document.querySelectorAll('.prateleira-optativas').forEach(prateleira => {
-        let temVisivel = false;
-        prateleira.querySelectorAll('.optativa-card').forEach(c => {
-            const corresponde = (area === 'todas' || c.getAttribute('data-area') === area);
-            if (corresponde) {
+        const categoriaPrateleira = prateleira.getAttribute('data-area');
+        
+        if (area === 'todas' || categoriaPrateleira === area) {
+            prateleira.classList.remove('escondido-por-filtro');
+            
+            // Garante que dentro da prateleira visível, nenhum cartão esteja escondido por resíduos antigos
+            prateleira.querySelectorAll('.optativa-card').forEach(c => {
                 c.classList.remove('escondido-por-filtro');
-                temVisivel = true;
-            } else {
-                c.classList.add('escondido-por-filtro');
-            }
-        });
-        // Esconde a prateleira inteira (título incluso) se não tiver nenhum cartão visível
-        prateleira.style.display = temVisivel ? 'block' : 'none';
+                c.style.display = '';
+            });
+        } else {
+            prateleira.classList.add('escondido-por-filtro');
+        }
+        
+        // Remove a lógica de display inline que entrava em conflito
+        prateleira.style.display = '';
     });
 }
 
@@ -3011,3 +3016,19 @@ function _pdfMostrarResultado(tipo, htmlConteudo) {
     texto.innerHTML = htmlConteudo;
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+// ── LÓGICA DO BOTÃO VOLTAR AO TOPO (INTELIGENTE) ──
+let lastScrollY = window.scrollY;
+window.addEventListener('scroll', () => {
+    const btnTopo = document.getElementById('btn-voltar-topo');
+    if (!btnTopo) return;
+    
+    // Se está a subir e já passou de 300px, mostra. Se não, esconde.
+    if (window.scrollY < lastScrollY && window.scrollY > 300) {
+        btnTopo.classList.add('visivel');
+    } else {
+        btnTopo.classList.remove('visivel');
+    }
+    
+    lastScrollY = window.scrollY;
+}, { passive: true });
