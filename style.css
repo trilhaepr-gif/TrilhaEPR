@@ -785,6 +785,7 @@
                 top: auto !important;
                 width: 100%;
                 z-index: 1000;
+                transform: none !important; /* Limpa qualquer resquício de animação */
             }
 
             /* Respiro padrão simples — sem calc(), sem variáveis, sem matemática */

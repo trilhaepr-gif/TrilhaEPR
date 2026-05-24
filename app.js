@@ -1882,6 +1882,7 @@ window.addEventListener('resize', ajustarEspacosFixos);
 
 // ── SMART STICKY HEADER (Encolhe ao fazer scroll) ──
 window.addEventListener('scroll', () => {
+    if (window.innerWidth <= 768) return;
     const header = document.querySelector('header');
     if (window.scrollY > 50) {
         header.classList.add('header-compacto');
