@@ -33,12 +33,10 @@
                         <div class="guia-popover">
                             <div class="guia-titulo">✨ Guia de Uso Rápido</div>
                             <ul class="guia-lista">
-                                <li><span>1</span> Navegue pelas Obrigatórias e Optativas.</li>
-                                <li><span>2</span> Clique nas disciplinas que já cursou para verificar sua percentagem
-                                    de evolução no curso.</li>
-                                <li><span>3</span> Preste atenção às cores (Pré-requisitos bloqueados, etc).</li>
-                                <li><span>4</span> Use o ✨Simular com IA para otimizar horários, evitar choques e
-                                    descobrir as disciplinas perfeitas para o seu perfil.</li>
+                                <li><span>1</span> <strong>Passado:</strong> Importe seu histórico do SIGAA (PDF ou texto) para preencher sua grade.</li>
+                                <li><span>2</span> <strong>Presente:</strong> Clique nas disciplinas para acompanhar sua evolução e acesse o 📊 Perfil Analítico.</li>
+                                <li><span>3</span> <strong>Futuro:</strong> Use o ✨ Simular com IA para planejar o próximo semestre e descobrir a sua trilha ideal.</li>
+                                <li><span>4</span> <strong>Atenção:</strong> Fique de olho nas cores! Matérias cinzas e bloqueadas indicam falta de pré-requisitos.</li>
                             </ul>
                         </div>
                     </div>
@@ -73,8 +71,9 @@
             </div>
         </div>
 
-        <div class="header-search-bar">
+        <div class="header-search-bar" style="position: relative;">
             <input type="text" id="campo-busca" placeholder="🔎 Pesquisar por nome ou código..." autocomplete="off">
+            <ul id="busca-resultados" class="busca-dropdown-lista"></ul>
         </div>
     </header>
 
@@ -362,12 +361,12 @@
             </p>
         </div>
 
-        <div id="fluxograma-container" class="fluxograma-container"></div>
-
         <div class="secao-especial" style="border-color: #888;">
             <div class="secao-titulo">Banco de Cadeias Seletivas (Necessário cursar pelo menos 1 de cada cadeia)</div>
             <div id="seletivas-grid" class="grid-seletivas"></div>
         </div>
+
+        <div id="fluxograma-container" class="fluxograma-container"></div>
 
         <div class="secao-especial">
             <div class="secao-titulo">Vitrine de Optativas (Filtrar e Planejar)</div>
@@ -679,8 +678,6 @@ O sistema irá encontrar automaticamente todos os códigos de disciplinas que vo
 
         </div><!-- /pdf-panel -->
     </div><!-- /modal-pdf -->
-
-    <button id="btn-voltar-topo" aria-label="Voltar ao topo" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">↑</button>
 
 </body>
 

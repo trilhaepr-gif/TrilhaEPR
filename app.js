@@ -1806,29 +1806,88 @@ async function iniciarAplicacao() {
     document.getElementById('txt-semestres').innerText = `${semestreAtual} semestres`;
     atualizarInterface();
 
-    // ── MOTOR DE BUSCA REATIVO (ROBUSTO) ────────────────────────────
+    // ── MOTOR DE BUSCA AUTO-COMPLETE (SCROLL INTELIGENTE) ────────────────
     const campoBusca = document.getElementById('campo-busca');
-    if (campoBusca) {
+    const listaResultados = document.getElementById('busca-resultados');
+
+    if (campoBusca && listaResultados) {
+        // Esconde a lista se clicar fora
+        document.addEventListener('click', (e) => {
+            if (e.target !== campoBusca && e.target !== listaResultados) {
+                listaResultados.classList.remove('visivel');
+            }
+        });
+
         campoBusca.addEventListener('input', () => {
             const termo = campoBusca.value.trim().toLowerCase();
+            
+            if (!termo) {
+                listaResultados.classList.remove('visivel');
+                return;
+            }
 
-            // Captura TODOS os tipos de card de uma vez só
-            document.querySelectorAll('.card, .optativa-card, .card-seletiva').forEach(cardEl => {
-                const textoCard = cardEl.textContent.toLowerCase();
-                const temMatch = !termo || textoCard.includes(termo);
+            // Filtra as disciplinas reais
+            const filtradas = disciplinas.filter(d => 
+                d.nome.toLowerCase().includes(termo) || 
+                d.codigo.toLowerCase().includes(termo)
+            ).slice(0, 8); // Limita a 8 resultados para não poluir a tela
 
-                if (cardEl.classList.contains('optativa-card')) {
-                    // Optativas: esconder ou mostrar (display)
-                    cardEl.classList.toggle('escondido-busca', !temMatch);
-                    if (temMatch) cardEl.classList.remove('ofuscado-busca');
-                } else {
-                    // Fluxo principal e Seletivas: ofuscar ou mostrar
-                    cardEl.classList.toggle('ofuscado-busca', !temMatch);
-                    if (temMatch) cardEl.classList.remove('escondido-busca');
-                }
-            });
+            if (filtradas.length === 0) {
+                listaResultados.innerHTML = `<li class="busca-item"><span class="busca-item-nome" style="color:#777; font-style:italic;">Nenhuma disciplina encontrada.</span></li>`;
+            } else {
+                listaResultados.innerHTML = filtradas.map(d => `
+                    <li class="busca-item" onclick="navegarParaDisciplina('${d.id}')">
+                        <span class="busca-item-cod">${d.codigo}</span>
+                        <span class="busca-item-nome">${d.nome}</span>
+                    </li>
+                `).join('');
+            }
+            
+            listaResultados.classList.add('visivel');
         });
     }
+
+    // Função global para rolar a tela até o cartão e piscar
+    window.navegarParaDisciplina = function(idAlvo) {
+        if(campoBusca) campoBusca.value = '';
+        if(listaResultados) listaResultados.classList.remove('visivel');
+
+        document.querySelectorAll('.card-destaque-busca').forEach(el => el.classList.remove('card-destaque-busca'));
+
+        const alvo = document.querySelector(`[id="${idAlvo}"]`);
+        
+        if (alvo) {
+            // Se a prateleira estiver escondida por um filtro, mostra novamente para poder rolar até ela
+            const prateleiraPai = alvo.closest('.prateleira-optativas');
+            if (prateleiraPai && prateleiraPai.classList.contains('escondido-por-filtro')) {
+                document.querySelectorAll('.pilula-filtro').forEach(b => b.classList.remove('ativa'));
+                document.getElementById('btn-todas').classList.add('ativa');
+                document.querySelectorAll('.prateleira-optativas').forEach(p => p.classList.remove('escondido-por-filtro'));
+            }
+
+            // Rola suavemente até o elemento, considerando o offset do header fixo
+            const headerOffset = 130; 
+            const elementPosition = alvo.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          
+            window.scrollTo({
+                 top: offsetPosition,
+                 behavior: "smooth"
+            });
+
+            alvo.classList.add('card-destaque-busca');
+            setTimeout(() => alvo.classList.remove('card-destaque-busca'), 1500);
+
+            // Lida com o scroll horizontal se for uma optativa no mobile/desktop
+            const scrollPrateleira = alvo.closest('.scroll-prateleira');
+            if (scrollPrateleira) {
+                scrollPrateleira.scrollTo({
+                    left: alvo.offsetLeft - 20,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    };
     // ─────────────────────────────────────────────────────────────────
 }
 

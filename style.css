@@ -3980,6 +3980,78 @@
             opacity: 1;
         }
         
+        /* ── DROPDOWN DA BUSCA INTELIGENTE ── */
+        .busca-dropdown-lista {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid #4facfe;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none; 
+        }
+
+        .busca-dropdown-lista.visivel {
+            display: block;
+            animation: slideDownBusca 0.2s ease-out;
+        }
+
+        @keyframes slideDownBusca {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .busca-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: background 0.2s;
+        }
+
+        .busca-item:last-child {
+            border-bottom: none;
+        }
+
+        .busca-item:hover, .busca-item:focus {
+            background: rgba(79, 172, 254, 0.15);
+        }
+
+        .busca-item-cod {
+            font-size: 0.7rem;
+            color: #4facfe;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .busca-item-nome {
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        /* Animação para destacar o cartão encontrado na tela */
+        @keyframes piscarCardBuscado {
+            0%, 100% { transform: scale(1); box-shadow: none; border-color: transparent; }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(79, 172, 254, 0.8); border-color: #4facfe; z-index: 10;}
+        }
+
+        .card-destaque-busca {
+            animation: piscarCardBuscado 1.5s ease-in-out;
+        }
+
         /* ── MARRETA DO FILTRO (Prioridade Máxima de Ocultação) ── */
         .escondido-por-filtro {
             display: none !important;
