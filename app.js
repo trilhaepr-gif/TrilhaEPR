@@ -14,6 +14,7 @@ let planejadas = new Set();
 let sugeridasPelaIA = new Map();
 let turmasSelecionadas = new Map();
 let modoSimulacao = false;
+window.ultimaMateriaMovida = null;
 const mapaCoReqBidi = new Map();
 const mapaIdsParaCodigos = {};
 const mapaCodigosParaIds = {};
@@ -1445,8 +1446,10 @@ function _buildPilula(p, isMobile) {
     const disc = disciplinas.find(d => d.codigo === p.codigo);
     let iconeIA = '';
     let infoAudit = '';
-    let setaEsqHTML = '';
-    let setaDirHTML = '';
+    let controlesTurmaHTML = '';
+
+    // Prioridade 1: Nome da Matéria
+    const nomeTxt = disc ? disc.nome : (p.nome || p.codigo);
 
     if (disc) {
         infoAudit = ` (${disc.horas}h)`;
@@ -1461,28 +1464,48 @@ function _buildPilula(p, isMobile) {
         if (turmas.length > 1) {
             const idxAtual = (turmasSelecionadas.get(p.codigo) || 0);
             infoAudit += ` · Turma ${idxAtual + 1}/${turmas.length}`;
-            setaEsqHTML = `<span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', -1)">❮</span>`;
-            setaDirHTML = `<span class="seta-dinamica" onclick="mudarTurma('${p.codigo}', 1)">❯</span>`;
+            
+            // Botões blindados usando <div> em vez de <span> ou <button> para evitar conflitos CSS
+            controlesTurmaHTML = `
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <div onclick="mudarTurma('${p.codigo}', -1)" style="background:rgba(255,255,255,0.2); border-radius:4px; padding:2px 10px; cursor:pointer; font-size:0.7rem; font-weight:bold; color:#fff;">❮</div>
+                    <div onclick="mudarTurma('${p.codigo}', 1)" style="background:rgba(255,255,255,0.2); border-radius:4px; padding:2px 10px; cursor:pointer; font-size:0.7rem; font-weight:bold; color:#fff;">❯</div>
+                </div>`;
         }
     }
 
-    const cls    = p.choque ? 'pilula-choque' : 'pilula-ok';
-    const title  = isMobile ? '' : `title="${p.nome}${infoAudit}"`;
-    const nomeTxt = disc ? disc.nome : p.nome;
+    let cls = p.choque ? 'pilula-choque' : 'pilula-ok';
+    
+    // Faz a pílula pulsar se ela acabou de ser movida
+    if (window.ultimaMateriaMovida === p.codigo) {
+        cls += ' pilula-destaque-movimento';
+    }
+
+    const title = `title="${p.codigo} - ${nomeTxt}${infoAudit}"`;
 
     if (isMobile) {
-        // Mobile: estrutura de duas linhas (código + nome abaixo)
-        return `<div class="pilula-materia ${cls}">
-                    <div class="pilula-linha-cod">
-                        ${setaEsqHTML}
-                        <span class="txt-cod">${p.codigo}</span>${iconeIA}
-                        ${setaDirHTML}
+        let tagIA = (disc && sugeridasPelaIA.has(disc.id)) ? `<div class="badge-ia-pilula" style="margin-left:8px; white-space:nowrap; align-self:flex-start;">✨ IA</div>` : '';
+
+        // Mobile: Layout de 2 andares (Nome no topo / Controles na base)
+        return `<div class="pilula-materia ${cls}" style="display:flex; flex-direction:column; gap:8px; padding:10px; text-align:left;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="font-size:0.82rem; font-weight:700; color:#fff; line-height:1.25; white-space:normal; word-break:break-word;">
+                            ${nomeTxt}
+                        </div>
+                        ${tagIA}
                     </div>
-                    <span class="pilula-nome-disc">${nomeTxt}</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.15); padding-top:6px;">
+                        <div style="font-size:0.65rem; color:#aaa; font-family:monospace; font-weight:bold;">${p.codigo}</div>
+                        ${controlesTurmaHTML}
+                    </div>
                 </div>`;
     } else {
-        // Desktop: pílula compacta com tooltip nativo
-        return `<div class="pilula-materia ${cls}" ${title}>${setaEsqHTML}<span class="txt-cod">${p.codigo}</span>${iconeIA}${setaDirHTML}</div>`;
+        // Desktop: Mantém o layout horizontal, mas priorizando o Nome
+        return `<div class="pilula-materia ${cls}" ${title} style="display:flex; align-items:center; justify-content:center; gap:6px; overflow:hidden;">
+                    ${controlesTurmaHTML.replace(/padding:2px 10px/g, 'padding:1px 6px')}
+                    <div style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.75rem; font-weight:bold; color:#fff;">${nomeTxt}</div>
+                    <div style="font-size:0.8rem;">${iconeIA}</div>
+                </div>`;
     }
 }
 
@@ -1650,6 +1673,9 @@ function mudarTurma(codigo, direcao) {
 
     turmasSelecionadas.set(codigo, novoIdx);
 
+    // Rastreia quem se moveu
+    window.ultimaMateriaMovida = codigo;
+
     // Limpa alerta eventual para forçar reavaliação visual
     const btnGrade = document.getElementById('btn-grade-visual');
     if (btnGrade) {
@@ -1658,6 +1684,14 @@ function mudarTurma(codigo, direcao) {
     }
 
     abrirModalGrade(); // Redesenha a grade mantendo o modal aberto
+
+    // Rola suavemente até a nova posição da matéria no celular
+    setTimeout(() => {
+        const el = document.querySelector('.pilula-destaque-movimento');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 // ── MODAL GRADE VISUAL ──
@@ -1666,7 +1700,7 @@ function abrirModalGrade() {
     renderizarGradeVisual();
     document.getElementById('modal-grade').style.display = 'flex';
 }
-function fecharModalGrade() { document.getElementById('modal-grade').style.display = 'none'; }
+function fecharModalGrade() { document.getElementById('modal-grade').style.display = 'none'; window.ultimaMateriaMovida = null; }
 
 // Redesenha a grade ao girar o dispositivo (portrait ↔ landscape)
 window.addEventListener('resize', () => {
