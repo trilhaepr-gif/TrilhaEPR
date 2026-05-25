@@ -1,6 +1,3 @@
-O presente documento propõe uma estrutura profissional, objetiva e técnica para o arquivo README.md do seu projeto. O texto foi elaborado com rigor formal, focando na arquitetura, nas funcionalidades e no valor da aplicação, sem a utilização de elementos informais ou emojis.
-
-Você pode copiar o conteúdo abaixo e inseri-lo diretamente no seu repositório.
 
 Trilha EPR - Simulador de Fluxograma Acadêmico
 O Trilha EPR é uma aplicação web desenvolvida para auxiliar estudantes de graduação em Engenharia de Produção na gestão, no planejamento e na otimização de seus fluxos acadêmicos. A ferramenta integra a importação de dados do sistema acadêmico (SIGAA), a simulação de grades horárias com suporte de algoritmos de recomendação e a visualização de métricas de desempenho por meio de um painel analítico avançado.
