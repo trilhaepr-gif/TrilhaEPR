@@ -41,20 +41,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="termometro-wrapper">
-                    <div id="termometro" class="termometro status-verde">Saudável</div>
-                    <div id="msg-termometro" class="msg-termometro">Comece a marcar suas matérias.</div>
-                </div>
+
             </div>
             <div class="header-dir">
                 <div class="grupo-controles">
                     <div class="nivel-badge" id="txt-nivel">Menor Pendência: 1º Período</div>
-                    <div class="contador-semestres">
-                        <span style="color: #aaa; font-weight: normal; font-size: 0.7rem;">Tempo:</span>
-                        <button onclick="mudarSemestre(-1)">-</button>
-                        <span id="txt-semestres">1 semestre</span>
-                        <button onclick="mudarSemestre(1)">+</button>
-                    </div>
+
                     <div class="botoes-acao">
                         <button id="btn-abrir-importar" class="btn-importar-sigaa" onclick="abrirModalPDF()" title="Importar histórico do SIGAA (PDF)">
                             <span>&#128196;</span> Importar SIGAA
@@ -679,6 +671,22 @@ O sistema irá encontrar automaticamente todos os códigos de disciplinas que vo
         </div><!-- /pdf-panel -->
     </div><!-- /modal-pdf -->
 
+    <div id="modal-bloqueio" class="modal-overlay" style="z-index: 4000;">
+        <div class="modal-ia" style="max-width: 400px;">
+            <div class="modal-header" style="background: rgba(244, 67, 54, 0.15); border-bottom: 1px solid rgba(244, 67, 54, 0.3);">
+                <h3 style="color:#f44336; margin:0; font-size: 1rem; display:flex; align-items:center; gap:8px;">
+                    🔒 Disciplina Bloqueada
+                </h3>
+                <button onclick="fecharModalBloqueio()" style="background:none; border:none; color:#f44336; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#ccc; margin-top:0;">Para liberar <strong id="bloqueio-nome-materia" style="color:#fff;"></strong>, você precisa primeiro concluir as seguintes disciplinas:</p>
+                <div id="bloqueio-lista-requisitos" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                </div>
+                <button onclick="fecharModalBloqueio()" style="margin-top:15px; width:100%; background:transparent; border:1px solid #555; color:#aaa; padding:8px; border-radius:6px; cursor:pointer;">Entendi</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

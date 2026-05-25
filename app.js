@@ -8,7 +8,6 @@ const API_URL = AMBIENTE === 'dev'
 
 const META_TOTAL = 3600;
 const LIMITE_HORAS_UNB = 420;
-let semestreAtual = 1;
 let concluidas = new Set();
 let planejadas = new Set();
 let sugeridasPelaIA = new Map();
@@ -254,7 +253,6 @@ function construirMapaCoReq() {
 
 function salvarDados() {
     localStorage.setItem('progresso_EPR_V9', JSON.stringify([...concluidas]));
-    localStorage.setItem('semestre_EPR_V9', semestreAtual.toString());
 }
 
 // ==========================================
@@ -547,22 +545,54 @@ function toggleCard(id) {
 
     // V24: Cadeado Lógico Absoluto (Trava de Segurança Universal)
     if (!cumpreRequisitos(m)) {
-        // Aplica tremor em todos os cards desta matéria
+        // Aplica tremor no card clicado (mantém o feedback físico)
         document.querySelectorAll(`[id="${id}"]`).forEach(el => {
             el.classList.add('bloqueado-shake');
             setTimeout(() => el.classList.remove('bloqueado-shake'), 500);
         });
 
-        // Destaca pré-requisitos faltantes
-        m.req.forEach(r => {
-            const reqId = Array.isArray(r) ? r[0] : r;
-            document.querySelectorAll(`[id="${reqId}"]`).forEach(el => {
-                el.classList.remove('falta-prereq');
-                void el.offsetWidth;
-                el.classList.add('falta-prereq');
-                setTimeout(() => el.classList.remove('falta-prereq'), 1200);
-            });
+        // Analisa exatamente o que falta para exibir no modal
+        const historico = obterHistoricoOficial();
+        let faltantesHTML = '';
+
+        m.reqOficial.forEach(r => {
+            if (!requisitoAtendidoOficial(r, historico)) {
+                if (Array.isArray(r)) {
+                    // É uma cadeia seletiva (ou)
+                    faltantesHTML += `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; border:1px dashed #555; margin-bottom:6px;">
+                                        <span style="font-size:0.75rem; color:#aaa; margin-bottom:5px; display:block;">Cursar pelo menos UMA destas:</span>`;
+                    r.forEach(opcao => {
+                        let idOpcao = mapaCodigosParaIds[opcao] || opcao;
+                        let nomeOpcao = mapaCodigosParaNomes[opcao] || opcao;
+                        // Exibe apenas o Nome traduzido
+                        faltantesHTML += `<div onclick="fecharModalBloqueio(); navegarParaDisciplina('${idOpcao}')" style="cursor:pointer; color:#4facfe; font-size:0.85rem; padding:6px 0; display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:1rem;">🎯</span> ${nomeOpcao}
+                                          </div>`;
+                    });
+                    faltantesHTML += `</div>`;
+                } else {
+                    // Requisito obrigatório único ou lógica complexa (E/OU)
+                    const strReq = String(r);
+                    // Usa RegEx para extrair todos os códigos UnB presentes na regra
+                    const codigosEncontrados = strReq.match(/[A-Z]{3}\d{4}/g) || [strReq];
+                    
+                    codigosEncontrados.forEach(cod => {
+                        // Cria botão APENAS se o aluno ainda NÃO tiver essa matéria específica
+                        if (!historico.has(cod)) {
+                            let idOpcao = mapaCodigosParaIds[cod] || cod;
+                            let nomeOpcao = mapaCodigosParaNomes[cod] || cod;
+                            
+                            // Exibe apenas o Nome traduzido no botão interativo
+                            faltantesHTML += `<div onclick="fecharModalBloqueio(); navegarParaDisciplina('${idOpcao}')" style="cursor:pointer; background:rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.3); padding:10px; border-radius:6px; color:#4facfe; font-size:0.85rem; display:flex; align-items:center; gap:6px; margin-bottom: 6px; transition:0.2s;">
+                                                <span style="font-size:1rem;">🎯</span> ${nomeOpcao}
+                                              </div>`;
+                        }
+                    });
+                }
+            }
         });
+
+        abrirModalBloqueio(m.nome, faltantesHTML);
         return; // ⛔ TRAVA: Impede a seleção/conclusão
     }
 
@@ -710,14 +740,6 @@ function apagarDominó() {
 // ==========================================
 // LÓGICA DE SAÚDE E PENDÊNCIA (CORRIGIDAS)
 // ==========================================
-function calcularSaudeCurso(horasFeitas, semestreA) {
-    if (horasFeitas === 0 && semestreA === 1) return { status: "INICIANDO", classe: "status-verde", msg: "Bem-vindo ao curso!", corHEx: "var(--cor-saudavel)" };
-    const ritmo = horasFeitas / semestreA;
-    if (ritmo >= 280) return { status: "SAUDÁVEL", classe: "status-verde", msg: "Ritmo ideal! Formatura em até 12 semestres.", corHEx: "var(--cor-saudavel)" };
-    else if (ritmo >= 200) return { status: "ATENÇÃO", classe: "status-amarelo", msg: "Ritmo moderado. Formatura entre 13 e 17 semestres.", corHEx: "#ff9800" };
-    else return { status: "RISCO CRÍTICO", classe: "status-vermelho", msg: "Risco de Jubilamento! Extrapola o limite de 18 semestres.", corHEx: "#f44336" };
-}
-
 function atualizarNivelDoAluno() {
     let menorPendente = 11;
     for (let i = 1; i <= 10; i++) {
@@ -988,18 +1010,11 @@ function atualizarInterface() {
             containerPerc.classList.add('progresso-simulado');
         } else {
             containerPerc.classList.remove('progresso-simulado');
-            // Restaura a cor real baseada na saúde do aluno (SIGAA)
-            const statusReal = calcularSaudeCurso(totalRealH, semestreAtual);
-            containerPerc.style.color = statusReal.corHEx;
+            containerPerc.style.color = 'var(--cor-saudavel)';
         }
     }
 
     // APLICANDO AS FUNÇÕES RECUPERADAS NA INTERFACE
-    const saude = calcularSaudeCurso(totalRealH, semestreAtual);
-    document.getElementById('termometro').innerText = saude.status;
-    document.getElementById('termometro').className = `termometro ${saude.classe}`;
-    document.getElementById('msg-termometro').innerText = saude.msg;
-
     atualizarNivelDoAluno();
 
     if (modoSimulacao) {
@@ -1146,7 +1161,6 @@ function limparProgresso() {
     atualizarSteppers();
     atualizarInterface();
 }
-function mudarSemestre(v) { semestreAtual = Math.max(1, semestreAtual + v); document.getElementById('txt-semestres').innerText = `${semestreAtual} semestres`; salvarDados(); atualizarInterface(); }
 
 // MÁGICA DA IA (PYTHON) - CO-PILOT AUTOFILL
 async function executarIA() {
@@ -1694,6 +1708,22 @@ function mudarTurma(codigo, direcao) {
     }, 100);
 }
 
+// ── MODAL DE BLOQUEIO (PRÉ-REQUISITOS) ──
+function abrirModalBloqueio(nomeMateria, listaHTML) {
+    document.getElementById('bloqueio-nome-materia').textContent = nomeMateria;
+    document.getElementById('bloqueio-lista-requisitos').innerHTML = listaHTML;
+    document.getElementById('modal-bloqueio').style.display = 'flex';
+}
+
+function fecharModalBloqueio() {
+    document.getElementById('modal-bloqueio').style.display = 'none';
+}
+
+// Permite fechar o modal de bloqueio clicando fora dele
+document.getElementById('modal-bloqueio').addEventListener('click', function(e) {
+    if (e.target === this) fecharModalBloqueio();
+});
+
 // ── MODAL GRADE VISUAL ──
 
 function abrirModalGrade() {
@@ -1830,14 +1860,11 @@ async function iniciarAplicacao() {
     await carregarDadosExternos();
     const salvo = localStorage.getItem('progresso_EPR_V9');
     if (salvo) JSON.parse(salvo).forEach(id => concluidas.add(id));
-    const sem = localStorage.getItem('semestre_EPR_V9');
-    if (sem) semestreAtual = parseInt(sem);
 
     construirMapaCoReq();
     construirInterface();
     carregarML();          // Restaura contadores de Módulo Livre
     atualizarSteppers();   // Desenha os visores dos steppers
-    document.getElementById('txt-semestres').innerText = `${semestreAtual} semestres`;
     atualizarInterface();
 
     // ── MOTOR DE BUSCA AUTO-COMPLETE (SCROLL INTELIGENTE) ────────────────
