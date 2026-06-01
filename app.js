@@ -2536,7 +2536,7 @@ document.addEventListener('keydown', (e) => {
  *
  * Estratégia Regex (linha-a-linha):
  * 1. Detecta o padrão de código UnB: [A-Z]{3}\d{4}  (ex: EPR0001, MAT0025)
- * 2. Na mesma linha, verifica a presença de "APR" ou "Aprovado"
+ * 2. Na mesma linha, verifica a presença de "APR", "CUMP" ou "Aprovado"
  *    para filtrar reprovações, trancamentos e cancelamentos.
  * 3. Converte cada código aprovado para o ID interno do app e marca como concluído.
  */
@@ -2609,8 +2609,8 @@ function _importarMostrarResultado(tipo, htmlConteudo) {
 function _processarTextoHistorico(textoCompleto) {
     // Padrão UnB: 3 letras maiúsculas + 4 dígitos
     const REGEX_CODIGO_UNB = /\b([A-Z]{3}\d{4})\b/g;
-    // Status de aprovação (APR, APROVADO, Aprovado) — ignora REP, TRANC, CANC, etc.
-    const REGEX_APROVADO   = /\b(APR|APROVADO|Aprovado)\b/i;
+    // Status de aprovação (APR, CUMP, APROVADO, Aprovado) — ignora REP, TRANC, CANC, etc.
+    const REGEX_APROVADO   = /\b(APR|CUMP|APROVADO|Aprovado)\b/i;
 
     const linhas = textoCompleto.split('\n');
     const codigosAprovados  = new Set();
@@ -2945,7 +2945,7 @@ function _pdfProcessarArquivoSelecionado() {
             if (resultado.codigosAprovados.size === 0) {
                 _pdfMostrarEstadoDZ('idle');
                 _pdfMostrarResultado('aviso',
-                    '🔍 Nenhuma disciplina com status <strong>APR / Aprovado</strong> foi encontrada neste PDF.<br>' +
+                    '🔍 Nenhuma disciplina com status <strong>APR / CUMP / Aprovado</strong> foi encontrada neste PDF.<br>' +
                     '<small style="color:#aaa; margin-top:6px; display:block;">Verifique se o PDF é o <em>Histórico Escolar</em> emitido pelo SIGAA (não o espelho de matrícula ou outro documento).</small>'
                 );
                 if (btn) { btn.disabled = false; btn.innerHTML = '&#128196; Tentar Novamente'; }
