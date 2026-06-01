@@ -35,17 +35,6 @@ Back-end (Motor de Simulação): API RESTful desenvolvida em Python, responsáve
 Instalação e Execução Local
 Como a interface da aplicação é baseada em tecnologias web nativas, a sua execução não requer processos complexos de compilação ou gerenciadores de pacotes para o front-end.
 
-Clone este repositório para a sua máquina local:
-
-Bash
-git clone https://github.com/seu-usuario/trilha-epr.git
-Certifique-se de que o arquivo de base de dados das disciplinas (disciplinas.csv) está presente no diretório raiz do projeto.
-
-Para executar o sistema com suporte a requisições de arquivos locais (necessário para o funcionamento correto do PapaParse), inicie um servidor HTTP simples. Se estiver utilizando Python, execute o seguinte comando no diretório do projeto:
-
-Bash
-python -m http.server 8000
-Acesse a aplicação no navegador através do endereço: http://localhost:8000.
 
 Configuração do Ambiente de API
 O motor de simulação por Inteligência Artificial depende de um serviço de retaguarda (Backend). A configuração de apontamento para este serviço está localizada no início do arquivo app.js:
