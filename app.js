@@ -1514,10 +1514,10 @@ function _buildPilula(p, isMobile) {
                     </div>
                 </div>`;
     } else {
-        // Desktop: Mantém o layout horizontal, mas priorizando o Nome
+        // Desktop: Layout condensado com apenas o código visível; o tooltip mostra o nome completo
         return `<div class="pilula-materia ${cls}" ${title} style="display:flex; align-items:center; justify-content:center; gap:6px; overflow:hidden;">
                     ${controlesTurmaHTML.replace(/padding:2px 10px/g, 'padding:1px 6px')}
-                    <div style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.75rem; font-weight:bold; color:#fff;">${nomeTxt}</div>
+                    <div style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.85rem; font-weight:700; color:#fff;">${p.codigo}</div>
                     <div style="font-size:0.8rem;">${iconeIA}</div>
                 </div>`;
     }
@@ -1926,14 +1926,14 @@ async function iniciarAplicacao() {
                 document.querySelectorAll('.prateleira-optativas').forEach(p => p.classList.remove('escondido-por-filtro'));
             }
 
-            // Rola suavemente até o elemento, considerando o offset do header fixo
-            const headerOffset = 130; 
-            const elementPosition = alvo.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          
+            // Rola suavemente até o elemento, centralizando-o verticalmente abaixo do header
+            const headerOffset = 130;
+            const rect = alvo.getBoundingClientRect();
+            const targetTop = window.pageYOffset + rect.top - headerOffset - ((window.innerHeight - headerOffset) / 2) + (rect.height / 2);
+
             window.scrollTo({
-                 top: offsetPosition,
-                 behavior: "smooth"
+                top: Math.max(0, targetTop),
+                behavior: 'smooth'
             });
 
             alvo.classList.add('card-destaque-busca');
@@ -1942,8 +1942,10 @@ async function iniciarAplicacao() {
             // Lida com o scroll horizontal se for uma optativa no mobile/desktop
             const scrollPrateleira = alvo.closest('.scroll-prateleira');
             if (scrollPrateleira) {
+                const targetLeft = alvo.offsetLeft - (scrollPrateleira.clientWidth / 2) + (alvo.offsetWidth / 2);
+                const maxLeft = scrollPrateleira.scrollWidth - scrollPrateleira.clientWidth;
                 scrollPrateleira.scrollTo({
-                    left: alvo.offsetLeft - 20,
+                    left: Math.max(0, Math.min(targetLeft, maxLeft)),
                     behavior: 'smooth'
                 });
             }
