@@ -119,13 +119,14 @@ async function carregarDadosExternos() {
                         disciplinas.forEach(disc => {
                             mapaIdsParaCodigos[disc.id] = disc.codigo;
                             if (disc.codigo) {
-                                if (disc.codigo.includes('|')) {
-                                    disc.codigo.split('|').forEach(c => {
-                                        mapaCodigosParaIds[c.trim()] = disc.id;
-                                    });
-                                } else {
-                                    mapaCodigosParaIds[disc.codigo] = disc.id;
-                                }
+                                // Suporta formato 'COD_ANTIGO | COD_NOVO'
+                                // Regra: primeiro a entrar, ganha (OBG vem antes no CSV e nunca é sobrescrito)
+                                const codigos = disc.codigo.split('|').map(c => c.trim().toUpperCase()).filter(Boolean);
+                                codigos.forEach(c => {
+                                    if (!mapaCodigosParaIds[c]) {
+                                        mapaCodigosParaIds[c] = disc.id;
+                                    }
+                                });
                                 mapaCodigosParaNomes[disc.codigo] = disc.nome; // Alimenta o mapa de tradução
                             }
                         });
@@ -2636,7 +2637,8 @@ function _processarTextoHistorico(textoCompleto) {
     const codigosDesconhecidos = [];
 
     codigosAprovados.forEach(cod => {
-        const id = mapaCodigosParaIds[cod];
+        const codUpper = cod.trim().toUpperCase();
+        const id = mapaCodigosParaIds[codUpper];
         if (id) codigosConhecidos.push({ codigo: cod, id });
         else     codigosDesconhecidos.push(cod);
     });
