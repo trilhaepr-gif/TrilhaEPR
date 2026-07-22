@@ -119,7 +119,13 @@ async function carregarDadosExternos() {
                         disciplinas.forEach(disc => {
                             mapaIdsParaCodigos[disc.id] = disc.codigo;
                             if (disc.codigo) {
-                                mapaCodigosParaIds[disc.codigo] = disc.id;
+                                if (disc.codigo.includes('|')) {
+                                    disc.codigo.split('|').forEach(c => {
+                                        mapaCodigosParaIds[c.trim()] = disc.id;
+                                    });
+                                } else {
+                                    mapaCodigosParaIds[disc.codigo] = disc.id;
+                                }
                                 mapaCodigosParaNomes[disc.codigo] = disc.nome; // Alimenta o mapa de tradução
                             }
                         });
@@ -1457,7 +1463,7 @@ function calcularAlocacoes() {
 // ─── Utilitário partilhado: constrói o HTML de uma pílula de matéria ─────────
 // isMobile controla: nome inline visível vs. apenas tooltip
 function _buildPilula(p, isMobile) {
-    const disc = disciplinas.find(d => d.codigo === p.codigo);
+    const disc = disciplinas.find(d => d.codigo.includes(p.codigo));
     let iconeIA = '';
     let infoAudit = '';
     let controlesTurmaHTML = '';
@@ -1674,7 +1680,7 @@ function renderizarGradeVisual() {
 // MOTOR DE TROCA DE TURMAS
 // ==========================================
 function mudarTurma(codigo, direcao) {
-    const disc = disciplinas.find(d => d.codigo === codigo);
+    const disc = disciplinas.find(d => d.codigo.includes(codigo));
     if (!disc) return;
     const turmas = separarTurmas(disc.horario);
     if (turmas.length <= 1) return;

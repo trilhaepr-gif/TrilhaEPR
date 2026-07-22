@@ -1,0 +1,157 @@
+[
+  {
+    "nome_novo": "INTRODUÇÃO À ENGENHARIA DE PRODUÇÃO",
+    "codigo_antigo": "EPR0056",
+    "codigo_novo": "EPR0122"
+  },
+  {
+    "nome_novo": "TÓPICOS ESPECIAIS EM PESQUISA OPERACIONAL",
+    "codigo_antigo": "EPR0023",
+    "codigo_novo": "EPR0027"
+  },
+  {
+    "nome_novo": "TÓPICOS ESPECIAIS EM PESQUISA OPERACIONAL",
+    "codigo_antigo": "EPR0067",
+    "codigo_novo": "EPR0027"
+  },
+  {
+    "nome_novo": "MORFOLOGIA E TAXONOMIA DAS CRIPTOGAMAS",
+    "codigo_antigo": "BOT0021",
+    "codigo_novo": "BOT0020"
+  },
+  {
+    "nome_novo": "INTRODUCAO A ANATOMIA VEGETAL",
+    "codigo_antigo": "BOT0042",
+    "codigo_novo": "BOT0004"
+  },
+  {
+    "nome_novo": "FISIOLOGIA VEGETAL",
+    "codigo_antigo": "BOT0049",
+    "codigo_novo": "BOT0008"
+  },
+  {
+    "nome_novo": "ECONOMIA INTERNACIONAL",
+    "codigo_antigo": "ECO0061",
+    "codigo_novo": "ECO0040"
+  },
+  {
+    "nome_novo": "CIRCUITOS ELÉTRICOS",
+    "codigo_antigo": "ENE0172",
+    "codigo_novo": "ENE0304"
+  },
+  {
+    "nome_novo": "INSTALAÇÕES ELÉTRICAS",
+    "codigo_antigo": "ENE0229",
+    "codigo_novo": "ENE0071"
+  },
+  {
+    "nome_novo": "ELETRICIDADE BÁSICA",
+    "codigo_antigo": "ENE0243",
+    "codigo_novo": "ENE0001"
+  },
+  {
+    "nome_novo": "MECANICA 2",
+    "codigo_antigo": "ENM0163",
+    "codigo_novo": "ENM0121"
+  },
+  {
+    "nome_novo": "SISTEMAS MECANICOS",
+    "codigo_antigo": "ENM0174",
+    "codigo_novo": "ENM0173"
+  },
+  {
+    "nome_novo": "INOVAÇÃO EM SISTEMAS DE PRODUÇÃO",
+    "codigo_antigo": "EPR0016",
+    "codigo_novo": "EPR0035"
+  },
+  {
+    "nome_novo": "PESQUISA OPERACIONAL EM ENGENHARIA 1",
+    "codigo_antigo": "EPR0020",
+    "codigo_novo": "EPR0066"
+  },
+  {
+    "nome_novo": "TÓPICOS ESPECIAIS EM PESQUISA OPERACIONAL",
+    "codigo_antigo": "EPR0024",
+    "codigo_novo": "EPR0027"
+  },
+  {
+    "nome_novo": "SEMINÁRIO EM ENGENHARIA DE PRODUÇÃO",
+    "codigo_antigo": "EPR0026",
+    "codigo_novo": "EPR0021"
+  },
+  {
+    "nome_novo": "TÓPICOS ESPECIAIS EM PESQUISA OPERACIONAL",
+    "codigo_antigo": "EPR0032",
+    "codigo_novo": "EPR0027"
+  },
+  {
+    "nome_novo": "PLANEJAMENTO E CONTROLE DA PRODUÇÃO",
+    "codigo_antigo": "EPR0039",
+    "codigo_novo": "EPR0002"
+  },
+  {
+    "nome_novo": "ERGONOMIA DE SISTEMAS PRODUTIVOS",
+    "codigo_antigo": "EPR0040",
+    "codigo_novo": "EPR0077"
+  },
+  {
+    "nome_novo": "TÓPICOS ESPECIAIS EM PESQUISA OPERACIONAL",
+    "codigo_antigo": "EPR0055",
+    "codigo_novo": "EPR0027"
+  },
+  {
+    "nome_novo": "INTRODUÇÃO À ENGENHARIA DE PRODUÇÃO",
+    "codigo_antigo": "EPR0057",
+    "codigo_novo": "EPR0122"
+  },
+  {
+    "nome_novo": "GESTÃO DA PRODUÇÃO E QUALIDADE",
+    "codigo_antigo": "FGA0184",
+    "codigo_novo": "FGA0307"
+  },
+  {
+    "nome_novo": "GESTÃO DA PRODUÇÃO E QUALIDADE",
+    "codigo_antigo": "FGA0195",
+    "codigo_novo": "FGA0307"
+  },
+  {
+    "nome_novo": "ELETROMAGNETISMO",
+    "codigo_antigo": "IFD0072",
+    "codigo_novo": "IFD0055"
+  },
+  {
+    "nome_novo": "MECÂNICA QUÂNTICA B",
+    "codigo_antigo": "IFD0098",
+    "codigo_novo": "IFD0030"
+  },
+  {
+    "nome_novo": "FISICA 3",
+    "codigo_antigo": "IFD0183",
+    "codigo_novo": "IFD0179"
+  },
+  {
+    "nome_novo": "FISICA 3 EXPERIMENTAL",
+    "codigo_antigo": "IFD0185",
+    "codigo_novo": "IFD0181"
+  },
+  {
+    "nome_novo": "FISICA MODERNA 1",
+    "codigo_antigo": "IFD0210",
+    "codigo_novo": "IFD0256"
+  },
+  {
+    "nome_novo": "FÍSICA MODERNA 2",
+    "codigo_antigo": "IFD0217",
+    "codigo_novo": "IFD0427"
+  },
+  {
+    "nome_novo": "FISICA 1 EXPERIMENTAL",
+    "codigo_antigo": "IFD0302",
+    "codigo_novo": "IFD0173"
+  },
+  {
+    "nome_novo": "PRÁTICA DE ENSINO EM INTRODUÇÃO À CIÊNCIA POLÍTICA",
+    "codigo_antigo": "POL0004",
+    "codigo_novo": "POL0005"
+  }
+]
